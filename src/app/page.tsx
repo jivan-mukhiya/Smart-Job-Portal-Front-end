@@ -1,10 +1,30 @@
-import Image from "next/image";
+import { CTASection } from "@/components/landing/CTASection";
+import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { Footer } from "@/components/landing/Footer";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { Navbar } from "@/components/landing/Navbar";
+import { UserTypeSection } from "@/components/landing/UserTypeSection";
 
-export default function Home() {
+
+export default function HomePage() {
   return (
-    <div className="p-50 text-4xl text-blue-600 font-extrabold w-full">
-      This is The Smart Job Portal !!
-    </div>
-  )
-    
+    <>
+      <Navbar />
+
+      <main>
+        <HeroSection />
+
+        <UserTypeSection />
+
+        <FeaturesSection />
+
+        <HowItWorksSection />
+
+        <CTASection />
+      </main>
+
+      <Footer />
+    </>
+  );
 }
