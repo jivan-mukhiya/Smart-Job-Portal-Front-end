@@ -25,10 +25,10 @@ import { useJob } from "@/hooks/useJob";
 import { jobService } from "@/services/job.service";
 
 import type { JobRequest } from "@/types/job";
+
 import { JobBasicInfo } from "./JobBasicInfo";
 import { JobDetails } from "./JobDetails";
 import { JobRequirements } from "./JobRequirements";
-
 
 
 /*
@@ -61,7 +61,11 @@ interface EditJobFormState {
 
   education: string;
 
-  salary: string;
+  salaryMin: string;
+
+  salaryMax: string;
+
+  applicationDeadline: string;
 
   jobType: string;
 
@@ -94,7 +98,11 @@ const initialForm: EditJobFormState = {
 
   education: "",
 
-  salary: "",
+  salaryMin: "",
+
+  salaryMax: "",
+
+  applicationDeadline: "",
 
   jobType: "",
 
@@ -110,53 +118,7 @@ const initialForm: EditJobFormState = {
 
 /*
 |--------------------------------------------------------------------------
-| Format salary for display
-|--------------------------------------------------------------------------
-*/
-
-function formatSalary(
-  salaryMin: number | null,
-  salaryMax: number | null,
-  currency: string | null,
-): string {
-  if (
-    salaryMin === null &&
-    salaryMax === null
-  ) {
-    return "";
-  }
-
-  const currencyValue =
-    currency?.trim() || "NPR";
-
-  if (
-    salaryMin !== null &&
-    salaryMax !== null
-  ) {
-    if (
-      salaryMin === salaryMax
-    ) {
-      return `${currencyValue} ${salaryMin.toLocaleString()}`;
-    }
-
-    return `${currencyValue} ${salaryMin.toLocaleString()} - ${salaryMax.toLocaleString()}`;
-  }
-
-  if (salaryMin !== null) {
-    return `${currencyValue} ${salaryMin.toLocaleString()}`;
-  }
-
-  if (salaryMax !== null) {
-    return `${currencyValue} ${salaryMax.toLocaleString()}`;
-  }
-
-  return "";
-}
-
-
-/*
-|--------------------------------------------------------------------------
-| Convert multiline backend text into array
+| Convert backend multiline text into array
 |--------------------------------------------------------------------------
 */
 
@@ -180,60 +142,32 @@ function splitLines(
 
 /*
 |--------------------------------------------------------------------------
-| Parse salary string
+| Convert backend datetime into datetime-local format
 |--------------------------------------------------------------------------
 |
-| Examples:
+| datetime-local expects:
 |
-| NPR 40,000 - 70,000
-|       ↓
-| salaryMin = 40000
-| salaryMax = 70000
+| YYYY-MM-DDTHH:mm
 |
-| NPR 50,000
-|       ↓
-| salaryMin = 50000
-| salaryMax = 50000
+| Backend may return:
+|
+| 2026-09-30T17:00:00
+|
+| or:
+|
+| 2026-09-30T17:00:00.000
 |
 |--------------------------------------------------------------------------
 */
 
-function parseSalaryRange(
-  value: string,
-): {
-  salaryMin: number | null;
-
-  salaryMax: number | null;
-} {
-  const numbers = value
-    .replace(/,/g, "")
-    .match(/\d+(?:\.\d+)?/g);
-
-  if (
-    !numbers ||
-    numbers.length === 0
-  ) {
-    return {
-      salaryMin: null,
-      salaryMax: null,
-    };
+function formatDateTimeLocal(
+  value: string | null,
+): string {
+  if (!value) {
+    return "";
   }
 
-  const parsed = numbers
-    .map(Number)
-    .filter(Number.isFinite);
-
-  if (parsed.length === 1) {
-    return {
-      salaryMin: parsed[0],
-      salaryMax: parsed[0],
-    };
-  }
-
-  return {
-    salaryMin: parsed[0],
-    salaryMax: parsed[1],
-  };
+  return value.slice(0, 16);
 }
 
 
@@ -306,7 +240,8 @@ export function EditJobForm({
     }
 
     setForm({
-      title: job.title ?? "",
+      title:
+        job.title ?? "",
 
       description:
         job.description ?? "",
@@ -331,11 +266,34 @@ export function EditJobForm({
       education:
         job.educationRequired ?? "",
 
-      salary: formatSalary(
-        job.salaryMin,
-        job.salaryMax,
-        job.salaryCurrency,
-      ),
+      /*
+      |--------------------------------------------------------------------------
+      | Salary
+      |--------------------------------------------------------------------------
+      */
+
+      salaryMin:
+        job.salaryMin !== null &&
+        job.salaryMin !== undefined
+          ? String(job.salaryMin)
+          : "",
+
+      salaryMax:
+        job.salaryMax !== null &&
+        job.salaryMax !== undefined
+          ? String(job.salaryMax)
+          : "",
+
+      /*
+      |--------------------------------------------------------------------------
+      | Application deadline
+      |--------------------------------------------------------------------------
+      */
+
+      applicationDeadline:
+        formatDateTimeLocal(
+          job.applicationDeadline,
+        ),
 
       jobType:
         job.jobType ?? "",
@@ -504,6 +462,16 @@ export function EditJobForm({
     const experience =
       Number(form.experience);
 
+    const salaryMin =
+      form.salaryMin.trim()
+        ? Number(form.salaryMin)
+        : null;
+
+    const salaryMax =
+      form.salaryMax.trim()
+        ? Number(form.salaryMax)
+        : null;
+
     const responsibilities =
       form.responsibilities
         .map((item) =>
@@ -519,6 +487,12 @@ export function EditJobForm({
         .filter(Boolean);
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Basic validation
+    |--------------------------------------------------------------------------
+    */
+
     if (!title) {
       return "Job title is required.";
     }
@@ -531,6 +505,13 @@ export function EditJobForm({
       return "Job location is required.";
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vacancy
+    |--------------------------------------------------------------------------
+    */
+
     if (
       !form.vacancy.trim() ||
       !Number.isInteger(vacancy) ||
@@ -538,6 +519,13 @@ export function EditJobForm({
     ) {
       return "Vacancies must be at least 1.";
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Experience
+    |--------------------------------------------------------------------------
+    */
 
     if (
       !form.experience.trim() ||
@@ -547,23 +535,122 @@ export function EditJobForm({
       return "Experience must be zero or greater.";
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Education
+    |--------------------------------------------------------------------------
+    */
+
     if (!education) {
       return "Education requirement is required.";
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Salary
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      salaryMin !== null &&
+      (!Number.isFinite(salaryMin) ||
+        salaryMin < 0)
+    ) {
+      return "Minimum salary must be zero or greater.";
+    }
+
+    if (
+      salaryMax !== null &&
+      (!Number.isFinite(salaryMax) ||
+        salaryMax < 0)
+    ) {
+      return "Maximum salary must be zero or greater.";
+    }
+
+    if (
+      salaryMin !== null &&
+      salaryMax !== null &&
+      salaryMin > salaryMax
+    ) {
+      return "Minimum salary cannot be greater than maximum salary.";
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Job type
+    |--------------------------------------------------------------------------
+    */
 
     if (!form.jobType) {
       return "Please select a job type.";
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Job level
+    |--------------------------------------------------------------------------
+    */
+
     if (!form.jobLevel) {
       return "Please select a job level.";
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application deadline
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      !form.applicationDeadline.trim()
+    ) {
+      return "Application deadline is required.";
+    }
+
+    const deadlineDate =
+      new Date(
+        form.applicationDeadline,
+      );
+
+    if (
+      Number.isNaN(
+        deadlineDate.getTime(),
+      )
+    ) {
+      return "Please enter a valid application deadline.";
+    }
+
+    if (
+      deadlineDate.getTime() <=
+      Date.now()
+    ) {
+      return "Application deadline must be in the future.";
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Responsibilities
+    |--------------------------------------------------------------------------
+    */
 
     if (
       responsibilities.length === 0
     ) {
       return "Please add at least one responsibility.";
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Skills
+    |--------------------------------------------------------------------------
+    */
 
     if (
       skills.length === 0
@@ -644,6 +731,16 @@ export function EditJobForm({
     const experienceRequired =
       Number(form.experience);
 
+    const salaryMin =
+      form.salaryMin.trim()
+        ? Number(form.salaryMin)
+        : null;
+
+    const salaryMax =
+      form.salaryMax.trim()
+        ? Number(form.salaryMax)
+        : null;
+
     const responsibilities =
       form.responsibilities
         .map((item) =>
@@ -664,20 +761,6 @@ export function EditJobForm({
           item.trim(),
         )
         .filter(Boolean);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | Salary
-    |--------------------------------------------------------------------------
-    */
-
-    const {
-      salaryMin,
-      salaryMax,
-    } = parseSalaryRange(
-      form.salary,
-    );
 
 
     /*
@@ -706,6 +789,12 @@ export function EditJobForm({
       address:
         job.address ?? null,
 
+      /*
+      |--------------------------------------------------------------------------
+      | Salary
+      |--------------------------------------------------------------------------
+      */
+
       salaryMin,
 
       salaryMax,
@@ -717,6 +806,12 @@ export function EditJobForm({
       salaryNegotiable:
         job.salaryNegotiable ??
         false,
+
+      /*
+      |--------------------------------------------------------------------------
+      | Job information
+      |--------------------------------------------------------------------------
+      */
 
       jobType:
         form.jobType,
@@ -732,9 +827,23 @@ export function EditJobForm({
       vacancies:
         vacancy,
 
+      /*
+      |--------------------------------------------------------------------------
+      | Application deadline
+      |--------------------------------------------------------------------------
+      |
+      | Keep the datetime-local value as:
+      |
+      | 2026-09-30T17:00
+      |
+      | Do NOT use toISOString() here because
+      | it can shift the time because of timezone conversion.
+      |
+      |--------------------------------------------------------------------------
+      */
+
       applicationDeadline:
-        job.applicationDeadline ??
-        null,
+        form.applicationDeadline,
 
       featured:
         job.featured ??
@@ -743,6 +852,12 @@ export function EditJobForm({
       urgent:
         job.urgent ??
         false,
+
+      /*
+      |--------------------------------------------------------------------------
+      | Required skills
+      |--------------------------------------------------------------------------
+      */
 
       requiredSkills:
         skills.map(
@@ -760,6 +875,12 @@ export function EditJobForm({
               index,
           }),
         ),
+
+      /*
+      |--------------------------------------------------------------------------
+      | Benefits
+      |--------------------------------------------------------------------------
+      */
 
       benefits:
         (
@@ -1022,7 +1143,9 @@ export function EditJobForm({
           {/* Basic Information */}
 
           <JobBasicInfo
-            title={form.title}
+            title={
+              form.title
+            }
             description={
               form.description
             }
@@ -1047,21 +1170,35 @@ export function EditJobForm({
             vacancy={
               form.vacancy
             }
+
             experience={
               form.experience
             }
+
             education={
               form.education
             }
-            salary={
-              form.salary
+
+            salaryMin={
+              form.salaryMin
             }
+
+            salaryMax={
+              form.salaryMax
+            }
+
+            applicationDeadline={
+              form.applicationDeadline
+            }
+
             jobType={
               form.jobType
             }
+
             jobLevel={
               form.jobLevel
             }
+
             onChange={(
               field,
               value,
@@ -1080,18 +1217,23 @@ export function EditJobForm({
             responsibilities={
               form.responsibilities
             }
+
             skills={
               form.skills
             }
+
             specifications={
               form.specifications
             }
+
             onChange={
               updateArrayField
             }
+
             onAdd={
               addArrayItem
             }
+
             onRemove={
               removeArrayItem
             }

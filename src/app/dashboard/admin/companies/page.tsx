@@ -4,7 +4,7 @@
 import { RefreshCw } from "lucide-react";
 
 import { AdminCompanyTable } from "@/components/admin/companies/AdminCompanyTable";
-import { useCompanies } from "@/hooks/useCompanies";
+import { useAdminCompanies } from "@/hooks/useAdminCompanies";
 
 export default function AdminCompaniesPage() {
   const {
@@ -16,7 +16,7 @@ export default function AdminCompaniesPage() {
     totalPages,
     goToPage,
     refetch,
-  } = useCompanies();
+  } = useAdminCompanies();
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

@@ -63,6 +63,7 @@ profile: {
   view: "/dashboard/company/profile/view",
 
   edit: "/dashboard/company/profile",
+   add: "/dashboard/company/profile/add",
 },
 
 // ----------------------------------------------------------

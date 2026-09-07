@@ -4,6 +4,7 @@ interface JobBasicInfoProps {
   title: string;
   description: string;
   location: string;
+
   onChange: (
     field:
       | "title"
@@ -52,8 +53,7 @@ export function JobBasicInfo({
             onChange={(event) =>
               onChange(
                 "title",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="e.g. Senior Java Developer"
@@ -80,8 +80,7 @@ export function JobBasicInfo({
             onChange={(event) =>
               onChange(
                 "description",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="Describe the role, responsibilities, and what the successful candidate will do..."
@@ -114,8 +113,7 @@ export function JobBasicInfo({
             onChange={(event) =>
               onChange(
                 "location",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="e.g. Kathmandu, Nepal"

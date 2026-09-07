@@ -100,24 +100,44 @@ export async function apiClient<T>(
 
       if (responseData) {
 
-        throw new ApiError(
+        const status =
+          responseData.status ??
+          error.response?.status ??
+          500;
 
+
+        const message =
           responseData.message ||
-            "Something went wrong.",
-
-          responseData.status ||
-            error.response?.status ||
-            500,
-
-          responseData.code ||
-            "UNKNOWN_ERROR",
-
           responseData.error ||
-            "UNKNOWN_ERROR",
+          error.message ||
+          "Something went wrong.";
 
+
+        const code =
+          responseData.code ||
+          "UNKNOWN_ERROR";
+
+
+        const errorCode =
+          responseData.error ||
+          responseData.code ||
+          "UNKNOWN_ERROR";
+
+
+        const errors =
           responseData.errors ||
-            []
+          [];
 
+
+        throw new ApiError(
+          message,
+          status,
+          code,
+          errorCode,
+          errors,
+          responseData.error,
+          responseData.path,
+          responseData.timestamp
         );
 
       }
@@ -130,10 +150,11 @@ export async function apiClient<T>(
       if (!error.response) {
 
         throw new ApiError(
-          "Unable to connect to the server.",
+          "Unable to connect to the server. Please check your internet connection.",
           0,
           "NETWORK_ERROR",
-          "NETWORK_ERROR"
+          "NETWORK_ERROR",
+          []
         );
 
       }
@@ -144,39 +165,56 @@ export async function apiClient<T>(
       ======================================================= */
 
       throw new ApiError(
-
         error.message ||
           "Something went wrong.",
-
         error.response.status,
-
         "UNKNOWN_ERROR",
-
-        "UNKNOWN_ERROR"
-
+        "UNKNOWN_ERROR",
+        []
       );
 
     }
 
 
     /* =========================================================
-       NORMAL ERROR
+       ALREADY ApiError
     ========================================================= */
 
-    if (error instanceof Error) {
+    if (error instanceof ApiError) {
+
       throw error;
+
     }
 
 
     /* =========================================================
-       FALLBACK
+       NORMAL JAVASCRIPT ERROR
+    ========================================================= */
+
+    if (error instanceof Error) {
+
+      throw new ApiError(
+        error.message ||
+          "Something went wrong.",
+        500,
+        "CLIENT_ERROR",
+        "CLIENT_ERROR",
+        []
+      );
+
+    }
+
+
+    /* =========================================================
+       UNKNOWN / FALLBACK ERROR
     ========================================================= */
 
     throw new ApiError(
-      "Something went wrong.",
+      "Something went wrong. Please try again.",
       500,
       "UNKNOWN_ERROR",
-      "UNKNOWN_ERROR"
+      "UNKNOWN_ERROR",
+      []
     );
 
   }

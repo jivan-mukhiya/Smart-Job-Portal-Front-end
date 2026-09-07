@@ -1,283 +1,349 @@
-  // src/types/job.ts
+// src/types/job.ts
 
-  // ============================================================
-  // JOB SKILL RESPONSE
-  // ============================================================
+// ============================================================
+// JOB SKILL RESPONSE
+// ============================================================
 
-  export interface JobSkill {
-    id: number;
-    skillName: string;
-    required: boolean;
-    displayOrder: number;
-  }
+export interface JobSkill {
+  id: number;
 
-  // ============================================================
-  // JOB BENEFIT RESPONSE
-  // ============================================================
+  skillName: string;
 
-  export interface JobBenefit {
-    id: number;
-    benefitName: string;
-    description: string | null;
-    displayOrder: number;
-  }
+  required: boolean;
 
-  // ============================================================
-  // JOB ATTACHMENT RESPONSE
-  // ============================================================
+  displayOrder: number;
+}
 
-  export interface JobAttachment {
-    id?: number;
-    fileName?: string | null;
-    fileUrl?: string | null;
-    fileSize?: string | null;
-    contentType?: string | null;
-  }
+// ============================================================
+// JOB BENEFIT RESPONSE
+// ============================================================
 
-  // ============================================================
-  // JOB REQUEST
-  //
-  // Matches backend:
-  // com.texas.smart.job.portal.modules.job.dto.request.JobRequest
-  // ============================================================
+export interface JobBenefit {
+  id: number;
 
-  export interface JobRequest {
-    title: string;
+  benefitName: string;
 
-    description?: string | null;
+  description: string | null;
 
-    responsibilities?: string | null;
+  displayOrder: number;
+}
 
-    requirements?: string | null;
+// ============================================================
+// JOB ATTACHMENT RESPONSE
+// ============================================================
 
-    location?: string | null;
+export interface JobAttachment {
+  id?: number;
 
-    address?: string | null;
+  fileName?: string | null;
 
-    salaryMin?: number | null;
+  fileUrl?: string | null;
 
-    salaryMax?: number | null;
+  fileSize?: string | null;
 
-    salaryCurrency?: string;
+  contentType?: string | null;
+}
 
-    salaryNegotiable?: boolean;
+// ============================================================
+// JOB REQUEST
+//
+// Matches backend:
+// com.texas.smart.job.portal.modules.job.dto.request.JobRequest
+// ============================================================
 
-    jobType?: string | null;
+export interface JobRequest {
+  // ==========================================================
+  // Basic Information
+  // ==========================================================
 
-    jobLevel?: string | null;
+  title: string;
 
-    experienceRequired?: number | null;
+  description?: string | null;
 
-    educationRequired?: string | null;
+  responsibilities?: string | null;
 
-    vacancies: number;
+  requirements?: string | null;
 
-    applicationDeadline?: string | null;
+  location?: string | null;
 
-    featured?: boolean;
+  address?: string | null;
 
-    urgent?: boolean;
+  // ==========================================================
+  // Salary
+  // ==========================================================
 
-    requiredSkills?: JobSkillRequest[];
+  salaryMin?: number | null;
 
-    benefits?: JobBenefitRequest[];
-  }
+  salaryMax?: number | null;
 
-  // ============================================================
-  // JOB SKILL REQUEST
-  //
-  // Matches backend JobSkillRequest
-  // ============================================================
+  salaryCurrency?: string;
 
-  export interface JobSkillRequest {
-    skillName: string;
+  salaryNegotiable?: boolean;
 
-    required?: boolean;
+  // ==========================================================
+  // Job Details
+  // ==========================================================
 
-    displayOrder?: number;
-  }
+  jobType?: string | null;
 
-  // ============================================================
-  // JOB BENEFIT REQUEST
-  //
-  // Assumed backend DTO:
-  //
-  // JobBenefitRequest {
-  //     String benefitName;
-  //     String description;
-  //     Integer displayOrder;
-  // }
-  //
-  // Your message contained JobSkillRequest twice.
-  // ============================================================
+  jobLevel?: string | null;
 
-  export interface JobBenefitRequest {
-    benefitName: string;
+  experienceRequired?: number | null;
 
-    description?: string | null;
+  educationRequired?: string | null;
 
-    displayOrder?: number;
-  }
+  vacancies: number;
 
-  // ============================================================
-  // JOB RESPONSE
-  // ============================================================
+  // ==========================================================
+  // Application
+  // ==========================================================
 
-  export interface Job {
-    id: number;
+  applicationDeadline?: string | null;
 
-    title: string | null;
+  // ==========================================================
+  // Flags
+  // ==========================================================
 
-    slug: string | null;
+  featured?: boolean;
 
-    description: string | null;
+  urgent?: boolean;
 
-    responsibilities: string | null;
+  // ==========================================================
+  // Skills
+  // ==========================================================
 
-    requirements: string | null;
+  requiredSkills?: JobSkillRequest[];
 
-    location: string | null;
+  // ==========================================================
+  // Benefits
+  // ==========================================================
 
-    address: string | null;
+  benefits?: JobBenefitRequest[];
+}
 
-    companyId: number;
+// ============================================================
+// JOB SKILL REQUEST
+//
+// Matches backend JobSkillRequest
+// ============================================================
 
-    companyName: string | null;
+export interface JobSkillRequest {
+  skillName: string;
 
-    companyLogo: string | null;
+  required?: boolean;
 
-    salaryMin: number | null;
+  displayOrder?: number;
+}
 
-    salaryMax: number | null;
+// ============================================================
+// JOB BENEFIT REQUEST
+//
+// Matches backend JobBenefitRequest
+// ============================================================
 
-    salaryCurrency: string | null;
+export interface JobBenefitRequest {
+  benefitName: string;
 
-    salaryNegotiable: boolean;
+  description?: string | null;
 
-    salaryRange: string | null;
+  displayOrder?: number;
+}
 
-    jobType: string | null;
+// ============================================================
+// JOB RESPONSE
+// ============================================================
 
-    jobLevel: string | null;
+export interface Job {
+  id: number;
 
-    experienceRequired: number | null;
+  title: string | null;
 
-    educationRequired: string | null;
+  slug: string | null;
 
-    vacancies: number;
+  description: string | null;
 
-    applicationDeadline: string | null;
+  responsibilities: string | null;
 
-    postedDate: string | null;
+  requirements: string | null;
 
-    lastUpdatedDate: string | null;
+  location: string | null;
 
-    status: string | null;
+  address: string | null;
 
-    active: boolean;
+  // ==========================================================
+  // Company
+  // ==========================================================
 
-    featured: boolean;
+  companyId: number;
 
-    urgent: boolean;
+  companyName: string | null;
 
-    viewCount: number;
+  companyLogo: string | null;
 
-    applicationCount: number;
+  // ==========================================================
+  // Salary
+  // ==========================================================
 
-    expired: boolean;
+  salaryMin: number | null;
 
-    published: boolean;
+  salaryMax: number | null;
 
-    requiredSkills: JobSkill[];
+  salaryCurrency: string | null;
 
-    benefits: JobBenefit[];
+  salaryNegotiable: boolean;
 
-    attachments?: JobAttachment[];
-  }
+  salaryRange: string | null;
 
-  // ============================================================
-  // SINGLE JOB RESPONSE
-  // ============================================================
+  // ==========================================================
+  // Job Details
+  // ==========================================================
 
-  export interface JobResponse {
-    success: boolean;
+  jobType: string | null;
 
-    message: string;
+  jobLevel: string | null;
 
-    data: Job | null;
+  experienceRequired: number | null;
 
-    timestamp?: string;
-  }
+  educationRequired: string | null;
 
-  // ============================================================
-  // PAGINATED JOB DATA
-  // ============================================================
+  vacancies: number;
 
-  export interface JobsPageData {
-    content: Job[];
+  // ==========================================================
+  // Application
+  // ==========================================================
 
-    page: number;
+  applicationDeadline: string | null;
 
-    size: number;
+  postedDate: string | null;
 
-    totalElements: number;
+  lastUpdatedDate: string | null;
 
-    totalPages: number;
+  // ==========================================================
+  // Status
+  // ==========================================================
 
-    first: boolean;
+  status: string | null;
 
-    last: boolean;
+  active: boolean;
 
-    empty: boolean;
-  }
+  featured: boolean;
 
-  // ============================================================
-  // PUBLISHED JOBS RESPONSE
-  // ============================================================
+  urgent: boolean;
 
-  export interface PublishedJobsResponse {
-    success: boolean;
+  // ==========================================================
+  // Statistics
+  // ==========================================================
 
-    message: string;
+  viewCount: number;
 
-    data: JobsPageData;
+  applicationCount: number;
 
-    timestamp?: string;
-  }
+  expired: boolean;
 
-  // ============================================================
-  // MY JOBS RESPONSE
-  //
-  // GET /jobs/me?page=0&size=20
-  // ============================================================
+  published: boolean;
 
-  export interface MyJobsResponse {
-    success: boolean;
+  // ==========================================================
+  // Skills
+  // ==========================================================
 
-    message: string;
+  requiredSkills: JobSkill[];
 
-    data: JobsPageData;
+  // ==========================================================
+  // Benefits
+  // ==========================================================
 
-    timestamp?: string;
-  }
+  benefits: JobBenefit[];
 
-  // ============================================================
-  // GENERIC JOB MUTATION RESPONSE
-  //
-  // POST /jobs
-  // PUT /jobs/{id}
-  // DELETE /jobs/{id}
-  // PATCH /jobs/{id}/publish
-  // PATCH /jobs/{id}/close
-  // PATCH /jobs/{id}/status
-  // ============================================================
+  // ==========================================================
+  // Attachments
+  // ==========================================================
 
-  export interface JobMutationResponse {
-    success: boolean;
+  attachments?: JobAttachment[];
+}
 
-    message: string;
+// ============================================================
+// SINGLE JOB RESPONSE
+// ============================================================
 
-    data: Job | null;
+export interface JobResponse {
+  success: boolean;
 
-    timestamp?: string;
-  }
+  message: string;
+
+  data: Job | null;
+
+  timestamp?: string;
+}
+
+// ============================================================
+// PAGINATED JOB DATA
+// ============================================================
+
+export interface JobsPageData {
+  content: Job[];
+
+  page: number;
+
+  size: number;
+
+  totalElements: number;
+
+  totalPages: number;
+
+  first: boolean;
+
+  last: boolean;
+
+  empty: boolean;
+}
+
+// ============================================================
+// PUBLISHED JOBS RESPONSE
+// ============================================================
+
+export interface PublishedJobsResponse {
+  success: boolean;
+
+  message: string;
+
+  data: JobsPageData;
+
+  timestamp?: string;
+}
+
+// ============================================================
+// MY JOBS RESPONSE
+//
+// GET /jobs/me?page=0&size=20
+// ============================================================
+
+export interface MyJobsResponse {
+  success: boolean;
+
+  message: string;
+
+  data: JobsPageData;
+
+  timestamp?: string;
+}
+
+// ============================================================
+// GENERIC JOB MUTATION RESPONSE
+//
+// POST /jobs
+// PUT /jobs/{id}
+// DELETE /jobs/{id}
+// PATCH /jobs/{id}/publish
+// PATCH /jobs/{id}/close
+// PATCH /jobs/{id}/status
+// ============================================================
+
+export interface JobMutationResponse {
+  success: boolean;
+
+  message: string;
+
+  data: Job | null;
+
+  timestamp?: string;
+}

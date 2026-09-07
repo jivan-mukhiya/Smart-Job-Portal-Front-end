@@ -1,13 +1,8 @@
-
 export type CompanyStatus =
   | "PENDING"
   | "APPROVED"
   | "REJECTED"
   | "SUSPENDED";
-
-/* =============================================================
-   COMPANY ADDRESS
-============================================================= */
 
 export interface CompanyAddress {
   addressLine: string | null;
@@ -16,10 +11,6 @@ export interface CompanyAddress {
   country: string | null;
   postalCode: string | null;
 }
-
-/* =============================================================
-   COMPANY IMAGES
-============================================================= */
 
 export interface CompanyImages {
   logoPath: string | null;
@@ -36,10 +27,6 @@ export interface CompanyImages {
   bannerUrl: string | null;
 }
 
-/* =============================================================
-   COMPANY STATISTICS
-============================================================= */
-
 export interface CompanyStatistics {
   profileViews: number;
   followers: number;
@@ -49,10 +36,6 @@ export interface CompanyStatistics {
   averageRating: number;
 }
 
-/* =============================================================
-   SOCIAL LINK
-============================================================= */
-
 export interface CompanySocialLink {
   id: number;
   platform: string;
@@ -60,10 +43,6 @@ export interface CompanySocialLink {
   active: boolean;
   displayOrder: number;
 }
-
-/* =============================================================
-   COMPANY
-============================================================= */
 
 export interface Company {
   id: number;
@@ -99,72 +78,6 @@ export interface Company {
   updatedAt: string;
 }
 
-/* =============================================================
-   SOCIAL LINK REQUEST
-============================================================= */
-
-export interface SocialLinkRequest {
-  platform: string;
-  url: string;
-  active?: boolean;
-  displayOrder?: number;
-}
-
-/* =============================================================
-   COMPANY REGISTRATION REQUEST
-============================================================= */
-
-export interface CompanyRegistrationRequest {
-  companyName: string;
-  industry: string;
-  aboutUs?: string;
-  website?: string;
-  email: string;
-  phone: string;
-
-  logoFile?: File;
-  bannerFile?: File;
-
-  addressLine?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postalCode?: string;
-
-  socialLinks?: SocialLinkRequest[];
-}
-
-/* =============================================================
-   COMPANY UPDATE REQUEST
-============================================================= */
-
-export interface CompanyUpdateRequest {
-  companyName?: string;
-  industry?: string;
-  aboutUs?: string;
-  website?: string;
-  email?: string;
-  phone?: string;
-
-  logoFile?: File;
-  bannerFile?: File;
-
-  removeLogo?: boolean;
-  removeBanner?: boolean;
-
-  addressLine?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  postalCode?: string;
-
-  socialLinks?: SocialLinkRequest[];
-}
-
-/* =============================================================
-   PAGINATION
-============================================================= */
-
 export interface CompanyPageData {
   content: Company[];
 
@@ -183,10 +96,6 @@ export interface CompanyPageData {
   empty: boolean;
 }
 
-/* =============================================================
-   COMPANY RESPONSE
-============================================================= */
-
 export interface CompanyResponse {
   success: boolean;
 
@@ -196,10 +105,6 @@ export interface CompanyResponse {
 
   timestamp?: string;
 }
-
-/* =============================================================
-   COMPANIES RESPONSE
-============================================================= */
 
 export interface CompaniesResponse {
   success: boolean;
@@ -211,24 +116,16 @@ export interface CompaniesResponse {
   timestamp?: string;
 }
 
-/* =============================================================
-   ACTIVE COMPANIES RESPONSE
-============================================================= */
-
+/**
+ * /companies/active has the same pagination structure
+ * as /companies.
+ */
 export type ActiveCompaniesResponse =
   CompaniesResponse;
-
-/* =============================================================
-   STATUS UPDATE REQUEST
-============================================================= */
 
 export interface CompanyStatusUpdateRequest {
   status: CompanyStatus;
 }
-
-/* =============================================================
-   STATUS UPDATE RESPONSE
-============================================================= */
 
 export interface CompanyStatusResponse {
   success: boolean;

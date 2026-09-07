@@ -1,19 +1,12 @@
-
 "use client";
 
 import {
-  Ban,
-  Check,
+  CheckCircle2,
   Eye,
-  Loader2,
-  X,
+  XCircle,
 } from "lucide-react";
 
-import Link from "next/link";
-
-import {
-  useState,
-} from "react";
+import { useState } from "react";
 
 import { toast } from "sonner";
 
@@ -21,16 +14,14 @@ import { routes } from "@/config/routes";
 import { ApiError } from "@/lib/api-error";
 import { companyService } from "@/services/company.service";
 
-import type {
-  CompanyStatus,
-} from "@/types/company";
+import type { CompanyStatus } from "@/types/company";
 
 interface AdminCompanyActionsProps {
   companyId: number;
 
   status: CompanyStatus;
 
-  onStatusUpdated?: () => Promise<void> | void;
+  onStatusUpdated?: () => Promise<void>;
 }
 
 export function AdminCompanyActions({
@@ -38,39 +29,24 @@ export function AdminCompanyActions({
   status,
   onStatusUpdated,
 }: AdminCompanyActionsProps) {
-  const [loadingStatus, setLoadingStatus] =
-    useState<CompanyStatus | null>(null);
+  const [loading, setLoading] =
+    useState(false);
 
   const updateStatus = async (
     nextStatus: CompanyStatus,
   ) => {
     try {
-      setLoadingStatus(nextStatus);
+      setLoading(true);
 
-      const response =
-        await companyService.updateCompanyStatus(
-          companyId,
-          nextStatus,
-        );
-
-      if (!response.success) {
-        const message =
-          response.message ||
-          "Unable to update company status.";
-
-        toast.error(message);
-
-        return;
-      }
-
-      toast.success(
-        response.message ||
-          `Company status changed to ${nextStatus}.`,
+      await companyService.updateCompanyStatus(
+        companyId,
+        nextStatus,
       );
 
-      /*
-       * Refresh parent company list.
-       */
+      toast.success(
+        `Company status updated to ${nextStatus}.`,
+      );
+
       await onStatusUpdated?.();
     } catch (error: unknown) {
       let message =
@@ -78,165 +54,136 @@ export function AdminCompanyActions({
 
       if (error instanceof ApiError) {
         message = error.message;
-      } else if (
-        error instanceof Error
-      ) {
+      } else if (error instanceof Error) {
         message = error.message;
       }
 
       toast.error(message);
     } finally {
-      setLoadingStatus(null);
+      setLoading(false);
     }
   };
 
-  const isLoading =
-    loadingStatus !== null;
+  /*
+   * ============================================================
+   * VIEW
+   * ============================================================
+   *
+   * IMPORTANT:
+   * This uses the company ID.
+   *
+   * Example:
+   * companyId = 5
+   *
+   * routes.companies.details(5)
+   * -> /companies/5
+   *
+   * Keep this if your existing routes.companies.details()
+   * is already correct and working.
+   */
+
+  const viewHref =
+    routes.companies.details(companyId);
 
   return (
-    <div className="flex items-center gap-2">
-      {/* =====================================================
+    <div className="flex items-center justify-end gap-2 whitespace-nowrap">
+      {/* ========================================================
           VIEW
-      ====================================================== */}
+      ======================================================== */}
 
-      <Link
-        href={routes.admin.companies.details(
-          companyId,
-        )}
-        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-950"
+      <a
+        href={viewHref}
+        className="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
       >
-        <Eye size={14} />
-
+        <Eye className="mr-1.5 h-4 w-4" />
         View
-      </Link>
+      </a>
 
-      {/* =====================================================
+      {/* ========================================================
           PENDING
-      ====================================================== */}
+          APPROVE / REJECT
+      ======================================================== */}
 
       {status === "PENDING" && (
         <>
           <button
             type="button"
-            disabled={isLoading}
+            disabled={loading}
             onClick={() =>
-              updateStatus("APPROVED")
+              void updateStatus("APPROVED")
             }
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loadingStatus ===
-            "APPROVED" ? (
-              <Loader2
-                size={14}
-                className="animate-spin"
-              />
-            ) : (
-              <Check size={14} />
-            )}
-
+            <CheckCircle2 className="mr-1.5 h-4 w-4" />
             Approve
           </button>
 
           <button
             type="button"
-            disabled={isLoading}
+            disabled={loading}
             onClick={() =>
-              updateStatus("REJECTED")
+              void updateStatus("REJECTED")
             }
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-red-200 bg-red-50 px-2.5 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loadingStatus ===
-            "REJECTED" ? (
-              <Loader2
-                size={14}
-                className="animate-spin"
-              />
-            ) : (
-              <X size={14} />
-            )}
-
+            <XCircle className="mr-1.5 h-4 w-4" />
             Reject
           </button>
         </>
       )}
 
-      {/* =====================================================
+      {/* ========================================================
           APPROVED
-      ====================================================== */}
+          SUSPEND
+      ======================================================== */}
 
       {status === "APPROVED" && (
         <button
           type="button"
-          disabled={isLoading}
+          disabled={loading}
           onClick={() =>
-            updateStatus("SUSPENDED")
+            void updateStatus("SUSPENDED")
           }
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-100 px-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loadingStatus ===
-          "SUSPENDED" ? (
-            <Loader2
-              size={14}
-              className="animate-spin"
-            />
-          ) : (
-            <Ban size={14} />
-          )}
-
           Suspend
         </button>
       )}
 
-      {/* =====================================================
+      {/* ========================================================
           REJECTED
-      ====================================================== */}
+          APPROVE
+      ======================================================== */}
 
       {status === "REJECTED" && (
         <button
           type="button"
-          disabled={isLoading}
+          disabled={loading}
           onClick={() =>
-            updateStatus("APPROVED")
+            void updateStatus("APPROVED")
           }
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loadingStatus ===
-          "APPROVED" ? (
-            <Loader2
-              size={14}
-              className="animate-spin"
-            />
-          ) : (
-            <Check size={14} />
-          )}
-
+          <CheckCircle2 className="mr-1.5 h-4 w-4" />
           Approve
         </button>
       )}
 
-      {/* =====================================================
+      {/* ========================================================
           SUSPENDED
-      ====================================================== */}
+          APPROVE
+      ======================================================== */}
 
       {status === "SUSPENDED" && (
         <button
           type="button"
-          disabled={isLoading}
+          disabled={loading}
           onClick={() =>
-            updateStatus("APPROVED")
+            void updateStatus("APPROVED")
           }
-          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loadingStatus ===
-          "APPROVED" ? (
-            <Loader2
-              size={14}
-              className="animate-spin"
-            />
-          ) : (
-            <Check size={14} />
-          )}
-
+          <CheckCircle2 className="mr-1.5 h-4 w-4" />
           Approve
         </button>
       )}

@@ -2,17 +2,29 @@
 
 interface JobDetailsProps {
   vacancy: string;
+
   experience: string;
+
   education: string;
-  salary: string;
+
+  salaryMin: string;
+
+  salaryMax: string;
+
+  applicationDeadline: string;
+
   jobType: string;
+
   jobLevel: string;
+
   onChange: (
     field:
       | "vacancy"
       | "experience"
       | "education"
-      | "salary"
+      | "salaryMin"
+      | "salaryMax"
+      | "applicationDeadline"
       | "jobType"
       | "jobLevel",
     value: string,
@@ -85,7 +97,9 @@ export function JobDetails({
   vacancy,
   experience,
   education,
-  salary,
+  salaryMin,
+  salaryMax,
+  applicationDeadline,
   jobType,
   jobLevel,
   onChange,
@@ -98,12 +112,14 @@ export function JobDetails({
         </h2>
 
         <p className="mt-1 text-sm text-gray-500">
-          Add employment, salary, and
-          qualification details.
+          Add employment, salary,
+          qualification, and deadline
+          details.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
         {/* Vacancies */}
         <div>
           <label
@@ -125,8 +141,7 @@ export function JobDetails({
             onChange={(event) =>
               onChange(
                 "vacancy",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="e.g. 2"
@@ -155,8 +170,7 @@ export function JobDetails({
             onChange={(event) =>
               onChange(
                 "experience",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="Years of experience"
@@ -183,8 +197,7 @@ export function JobDetails({
             onChange={(event) =>
               onChange(
                 "education",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             placeholder="e.g. Bachelor's degree in Computer Science"
@@ -193,29 +206,102 @@ export function JobDetails({
           />
         </div>
 
-        {/* Salary */}
+        {/* Minimum Salary */}
         <div>
           <label
-            htmlFor="job-salary"
+            htmlFor="job-salary-min"
             className="mb-2 block text-sm font-medium text-gray-700"
           >
-            Salary Range
+            Minimum Salary
+          </label>
+
+          <div className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
+              NPR
+            </span>
+
+            <input
+              id="job-salary-min"
+              type="number"
+              min={0}
+              step="0.01"
+              value={salaryMin}
+              onChange={(event) =>
+                onChange(
+                  "salaryMin",
+                  event.target.value,
+                )
+              }
+              placeholder="40000"
+              className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-14 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        {/* Maximum Salary */}
+        <div>
+          <label
+            htmlFor="job-salary-max"
+            className="mb-2 block text-sm font-medium text-gray-700"
+          >
+            Maximum Salary
+          </label>
+
+          <div className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-500">
+              NPR
+            </span>
+
+            <input
+              id="job-salary-max"
+              type="number"
+              min={0}
+              step="0.01"
+              value={salaryMax}
+              onChange={(event) =>
+                onChange(
+                  "salaryMax",
+                  event.target.value,
+                )
+              }
+              placeholder="70000"
+              className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-14 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+          </div>
+        </div>
+
+        {/* Application Deadline */}
+        <div>
+          <label
+            htmlFor="application-deadline"
+            className="mb-2 block text-sm font-medium text-gray-700"
+          >
+            Application Deadline
+            <span className="ml-1 text-red-500">
+              *
+            </span>
           </label>
 
           <input
-            id="job-salary"
-            type="text"
-            value={salary}
+            id="application-deadline"
+            type="datetime-local"
+            value={applicationDeadline}
+            min={new Date()
+              .toISOString()
+              .slice(0, 16)}
             onChange={(event) =>
               onChange(
-                "salary",
-                event.target
-                  .value,
+                "applicationDeadline",
+                event.target.value,
               )
             }
-            placeholder="e.g. NPR 40,000 - 70,000"
-            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           />
+
+          <p className="mt-1 text-xs text-gray-500">
+            Select the date and time until
+            which applications will be accepted.
+          </p>
         </div>
 
         {/* Job Type */}
@@ -236,8 +322,7 @@ export function JobDetails({
             onChange={(event) =>
               onChange(
                 "jobType",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -246,18 +331,14 @@ export function JobDetails({
               Select job type
             </option>
 
-            {JOB_TYPES.map(
-              (type) => (
-                <option
-                  key={type.value}
-                  value={
-                    type.value
-                  }
-                >
-                  {type.label}
-                </option>
-              ),
-            )}
+            {JOB_TYPES.map((type) => (
+              <option
+                key={type.value}
+                value={type.value}
+              >
+                {type.label}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -279,8 +360,7 @@ export function JobDetails({
             onChange={(event) =>
               onChange(
                 "jobLevel",
-                event.target
-                  .value,
+                event.target.value,
               )
             }
             className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -289,18 +369,14 @@ export function JobDetails({
               Select job level
             </option>
 
-            {JOB_LEVELS.map(
-              (level) => (
-                <option
-                  key={level.value}
-                  value={
-                    level.value
-                  }
-                >
-                  {level.label}
-                </option>
-              ),
-            )}
+            {JOB_LEVELS.map((level) => (
+              <option
+                key={level.value}
+                value={level.value}
+              >
+                {level.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

@@ -13,7 +13,7 @@ import { companyService } from "@/services/company.service";
 
 import type { Company } from "@/types/company";
 
-interface UseCompaniesReturn {
+interface UseActiveCompaniesReturn {
   companies: Company[];
 
   page: number;
@@ -33,7 +33,7 @@ interface UseCompaniesReturn {
 
 const PAGE_SIZE = 20;
 
-export function useCompanies(): UseCompaniesReturn {
+export function useActiveCompanies(): UseActiveCompaniesReturn {
   const [companies, setCompanies] =
     useState<Company[]>([]);
 
@@ -51,71 +51,68 @@ export function useCompanies(): UseCompaniesReturn {
   const [error, setError] =
     useState<string | null>(null);
 
-  const loadCompanies =
-    useCallback(async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  const loadCompanies = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        // PUBLIC / JOB SEEKER
-        //
-        // GET /companies/active?page=0&size=20
-        const response =
-          await companyService.getActiveCompanies(
-            page,
-            PAGE_SIZE,
-          );
+      // ========================================================
+      // IMPORTANT:
+      // PUBLIC PAGE USES /companies/active
+      // ========================================================
 
-        if (!response.success) {
-          const message =
-            response.message ||
-            "Unable to load active companies.";
-
-          setError(message);
-          setCompanies([]);
-
-          return;
-        }
-
-        const content =
-          response.data?.content ?? [];
-
-        // Keep the original Company type.
-        setCompanies(content);
-
-        setTotalPages(
-          response.data?.totalPages ?? 0,
+      const response =
+        await companyService.getActiveCompanies(
+          page,
+          PAGE_SIZE,
         );
 
-        setTotalElements(
-          response.data?.totalElements ?? 0,
-        );
-      } catch (error: unknown) {
-        let message =
+      if (!response.success) {
+        const message =
+          response.message ||
           "Unable to load active companies.";
-
-        if (error instanceof ApiError) {
-          message = error.message;
-        } else if (error instanceof Error) {
-          message = error.message;
-        }
 
         setError(message);
         setCompanies([]);
 
-        toast.error(message);
-      } finally {
-        setLoading(false);
+        return;
       }
-    }, [page]);
+
+      setCompanies(
+        response.data?.content ?? [],
+      );
+
+      setTotalPages(
+        response.data?.totalPages ?? 0,
+      );
+
+      setTotalElements(
+        response.data?.totalElements ?? 0,
+      );
+    } catch (error: unknown) {
+      let message =
+        "Unable to load active companies.";
+
+      if (error instanceof ApiError) {
+        message = error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      setError(message);
+      setCompanies([]);
+
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  }, [page]);
 
   useEffect(() => {
     void loadCompanies();
   }, [loadCompanies]);
 
-  const goToPage = (
-    nextPage: number,
-  ) => {
+  const goToPage = (nextPage: number) => {
     if (nextPage < 0) {
       return;
     }

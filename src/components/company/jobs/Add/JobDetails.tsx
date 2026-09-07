@@ -1,5 +1,8 @@
+"use client";
+
 import {
   Briefcase,
+  CalendarClock,
   ChevronDown,
   GraduationCap,
   Layers3,
@@ -14,14 +17,16 @@ interface JobDetailsProps {
     vacancy: string;
     experience: string;
     education: string;
-    salary: string;
+    salaryMin: string;
+    salaryMax: string;
+    applicationDeadline: string;
     jobType: string;
     jobLevel: string;
   };
 
   onChange: (
     field: string,
-    value: string
+    value: string,
   ) => void;
 }
 
@@ -94,6 +99,7 @@ export function JobDetails({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
       {/* Header */}
+
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
           <Layers3 size={19} />
@@ -111,8 +117,10 @@ export function JobDetails({
       </div>
 
       {/* Fields */}
+
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         {/* Vacancies */}
+
         <div>
           <FormLabel
             htmlFor="vacancy"
@@ -131,11 +139,13 @@ export function JobDetails({
             onChange={(e) =>
               onChange(
                 "vacancy",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="e.g. 2"
-            leftIcon={<Users size={17} />}
+            leftIcon={
+              <Users size={17} />
+            }
             required
           />
 
@@ -145,6 +155,7 @@ export function JobDetails({
         </div>
 
         {/* Experience */}
+
         <div>
           <FormLabel
             htmlFor="experience"
@@ -163,7 +174,7 @@ export function JobDetails({
             onChange={(e) =>
               onChange(
                 "experience",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="e.g. 2"
@@ -177,6 +188,7 @@ export function JobDetails({
         </div>
 
         {/* Education */}
+
         <div>
           <FormLabel
             htmlFor="education"
@@ -192,7 +204,7 @@ export function JobDetails({
             onChange={(e) =>
               onChange(
                 "education",
-                e.target.value
+                e.target.value,
               )
             }
             placeholder="e.g. Bachelor's in Computer Science"
@@ -203,31 +215,109 @@ export function JobDetails({
           />
         </div>
 
-        {/* Salary */}
+        {/* Minimum Salary */}
+
         <div>
-          <FormLabel htmlFor="salary">
-            Salary
+          <FormLabel htmlFor="salaryMin">
+            Minimum Salary
           </FormLabel>
 
           <Input
-            id="salary"
-            name="salary"
-            value={form.salary}
+            id="salaryMin"
+            name="salaryMin"
+            type="number"
+            min={0}
+            step="0.01"
+            value={form.salaryMin}
             onChange={(e) =>
               onChange(
-                "salary",
-                e.target.value
+                "salaryMin",
+                e.target.value,
               )
             }
-            placeholder="e.g. NPR 40,000 - 70,000"
+            placeholder="e.g. 40000"
+            rightElement={
+              <span className="text-xs text-slate-400">
+                NPR
+              </span>
+            }
           />
 
           <p className="mt-1.5 text-xs text-slate-400">
-            Example: NPR 40,000 - 70,000
+            Enter the minimum salary in NPR.
+          </p>
+        </div>
+
+        {/* Maximum Salary */}
+
+        <div>
+          <FormLabel htmlFor="salaryMax">
+            Maximum Salary
+          </FormLabel>
+
+          <Input
+            id="salaryMax"
+            name="salaryMax"
+            type="number"
+            min={0}
+            step="0.01"
+            value={form.salaryMax}
+            onChange={(e) =>
+              onChange(
+                "salaryMax",
+                e.target.value,
+              )
+            }
+            placeholder="e.g. 70000"
+            rightElement={
+              <span className="text-xs text-slate-400">
+                NPR
+              </span>
+            }
+          />
+
+          <p className="mt-1.5 text-xs text-slate-400">
+            Enter the maximum salary in NPR.
+          </p>
+        </div>
+
+        {/* Application Deadline */}
+
+        <div>
+          <FormLabel
+            htmlFor="applicationDeadline"
+            required
+          >
+            Application Deadline
+          </FormLabel>
+
+          <Input
+            id="applicationDeadline"
+            name="applicationDeadline"
+            type="datetime-local"
+            value={form.applicationDeadline}
+            onChange={(e) =>
+              onChange(
+                "applicationDeadline",
+                e.target.value,
+              )
+            }
+            min={new Date()
+              .toISOString()
+              .slice(0, 16)}
+            leftIcon={
+              <CalendarClock size={17} />
+            }
+            required
+          />
+
+          <p className="mt-1.5 text-xs text-slate-400">
+            Select the date and time until applications are accepted.
           </p>
         </div>
 
         {/* Job Type */}
+
         <div>
           <FormLabel
             htmlFor="jobType"
@@ -249,24 +339,33 @@ export function JobDetails({
               onChange={(e) =>
                 onChange(
                   "jobType",
-                  e.target.value
+                  e.target.value,
                 )
               }
               required
               className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
             >
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+              >
                 Select job type
               </option>
 
-              {JOB_TYPES.map((jobType) => (
-                <option
-                  key={jobType.value}
-                  value={jobType.value}
-                >
-                  {jobType.label}
-                </option>
-              ))}
+              {JOB_TYPES.map(
+                (jobType) => (
+                  <option
+                    key={
+                      jobType.value
+                    }
+                    value={
+                      jobType.value
+                    }
+                  >
+                    {jobType.label}
+                  </option>
+                ),
+              )}
             </select>
 
             <ChevronDown
@@ -281,6 +380,7 @@ export function JobDetails({
         </div>
 
         {/* Job Level */}
+
         <div>
           <FormLabel
             htmlFor="jobLevel"
@@ -302,24 +402,33 @@ export function JobDetails({
               onChange={(e) =>
                 onChange(
                   "jobLevel",
-                  e.target.value
+                  e.target.value,
                 )
               }
               required
               className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-10 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
             >
-              <option value="" disabled>
+              <option
+                value=""
+                disabled
+              >
                 Select job level
               </option>
 
-              {JOB_LEVELS.map((jobLevel) => (
-                <option
-                  key={jobLevel.value}
-                  value={jobLevel.value}
-                >
-                  {jobLevel.label}
-                </option>
-              ))}
+              {JOB_LEVELS.map(
+                (jobLevel) => (
+                  <option
+                    key={
+                      jobLevel.value
+                    }
+                    value={
+                      jobLevel.value
+                    }
+                  >
+                    {jobLevel.label}
+                  </option>
+                ),
+              )}
             </select>
 
             <ChevronDown

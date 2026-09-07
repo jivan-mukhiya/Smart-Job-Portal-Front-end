@@ -10,11 +10,14 @@ interface DynamicListFieldProps {
   description?: string;
   placeholder?: string;
   items: string[];
+
   onChange: (
     index: number,
     value: string,
   ) => void;
+
   onAdd: () => void;
+
   onRemove: (
     index: number,
   ) => void;
@@ -56,8 +59,7 @@ export function DynamicListField({
                 onChange={(event) =>
                   onChange(
                     index,
-                    event.target
-                      .value,
+                    event.target.value,
                   )
                 }
                 placeholder={
@@ -69,14 +71,14 @@ export function DynamicListField({
               <button
                 type="button"
                 onClick={() =>
-                  onRemove(
-                    index,
-                  )
+                  onRemove(index)
                 }
                 disabled={
                   items.length === 1
                 }
-                aria-label={`Remove ${label} ${index + 1}`}
+                aria-label={`Remove ${label} ${
+                  index + 1
+                }`}
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Trash2 className="h-4 w-4" />
@@ -92,6 +94,7 @@ export function DynamicListField({
         className="inline-flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
       >
         <Plus className="h-4 w-4" />
+
         Add {label}
       </button>
     </div>

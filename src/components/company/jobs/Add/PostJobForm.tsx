@@ -33,29 +33,23 @@ type ArrayField =
 
 interface PostJobFormState {
   title: string;
-
   description: string;
 
   vacancy: string;
-
   location: string;
-
   experience: string;
-
   education: string;
 
   salaryMin: string;
-
   salaryMax: string;
 
-  jobType: string;
+  applicationDeadline: string;
 
+  jobType: string;
   jobLevel: string;
 
   responsibilities: string[];
-
   skills: string[];
-
   specifications: string[];
 }
 
@@ -68,29 +62,23 @@ export function PostJobForm() {
   const [form, setForm] =
     useState<PostJobFormState>({
       title: "",
-
       description: "",
 
       vacancy: "",
-
       location: "",
-
       experience: "",
-
       education: "",
 
       salaryMin: "",
-
       salaryMax: "",
 
-      jobType: "",
+      applicationDeadline: "",
 
+      jobType: "",
       jobLevel: "",
 
       responsibilities: [""],
-
       skills: [""],
-
       specifications: [""],
     });
 
@@ -104,7 +92,6 @@ export function PostJobForm() {
   ) {
     setForm((previous) => ({
       ...previous,
-
       [field]: value,
     }));
   }
@@ -254,6 +241,10 @@ export function PostJobForm() {
       return false;
     }
 
+    // ========================================================
+    // SALARY VALIDATION
+    // ========================================================
+
     const salaryMin =
       form.salaryMin.trim()
         ? Number(form.salaryMin)
@@ -300,6 +291,50 @@ export function PostJobForm() {
       return false;
     }
 
+    // ========================================================
+    // APPLICATION DEADLINE
+    // ========================================================
+
+    if (!form.applicationDeadline) {
+      toast.error(
+        "Application deadline is required.",
+      );
+
+      return false;
+    }
+
+    const deadline =
+      new Date(
+        form.applicationDeadline,
+      );
+
+    if (
+      Number.isNaN(
+        deadline.getTime(),
+      )
+    ) {
+      toast.error(
+        "Please provide a valid application deadline.",
+      );
+
+      return false;
+    }
+
+    if (
+      deadline.getTime() <=
+      Date.now()
+    ) {
+      toast.error(
+        "Application deadline must be in the future.",
+      );
+
+      return false;
+    }
+
+    // ========================================================
+    // RESPONSIBILITIES
+    // ========================================================
+
     const responsibilities =
       form.responsibilities.filter(
         (item) =>
@@ -316,6 +351,10 @@ export function PostJobForm() {
 
       return false;
     }
+
+    // ========================================================
+    // SKILLS
+    // ========================================================
 
     const skills =
       form.skills.filter(
@@ -336,10 +375,6 @@ export function PostJobForm() {
 
   // ==========================================================
   // NORMALIZE ENUM
-  //
-  // Example:
-  // "Full Time" -> "FULL_TIME"
-  // "Mid Level" -> "MID_LEVEL"
   // ==========================================================
 
   function normalizeEnum(
@@ -391,6 +426,10 @@ export function PostJobForm() {
           item.trim(),
         );
 
+    // ========================================================
+    // SALARY
+    // ========================================================
+
     const salaryMin =
       form.salaryMin.trim()
         ? Number(form.salaryMin)
@@ -401,67 +440,85 @@ export function PostJobForm() {
         ? Number(form.salaryMax)
         : null;
 
-    const payload: JobRequest = {
-      title:
-        form.title.trim(),
+    // ========================================================
+    // APPLICATION DEADLINE
+    //
+    // datetime-local already produces:
+    // YYYY-MM-DDTHH:mm
+    //
+    // Spring LocalDateTime accepts this format.
+    // Do NOT convert it to ISO with Z because that
+    // introduces timezone conversion.
+    // ========================================================
 
-      description:
-        form.description.trim(),
+    const applicationDeadline =
+      form.applicationDeadline
+        ? form.applicationDeadline
+        : null;
 
-      responsibilities:
-        responsibilities.join("\n"),
+    const payload =
+      {
+        title:
+          form.title.trim(),
 
-      requirements:
-        specifications.length > 0
-          ? specifications.join(
-              "\n",
-            )
-          : null,
+        description:
+          form.description.trim(),
 
-      location:
-        form.location.trim(),
+        responsibilities:
+          responsibilities.join(
+            "\n",
+          ),
 
-      address: null,
+        requirements:
+          specifications.length > 0
+            ? specifications.join(
+                "\n",
+              )
+            : null,
 
-      salaryMin,
+        location:
+          form.location.trim(),
 
-      salaryMax,
+        address: null,
 
-      salaryCurrency: "NPR",
+        salaryMin,
 
-      salaryNegotiable: false,
+        salaryMax,
 
-      jobType:
-        normalizeEnum(
-          form.jobType,
-        ),
+        salaryCurrency: "NPR",
 
-      jobLevel:
-        normalizeEnum(
-          form.jobLevel,
-        ),
+        salaryNegotiable: false,
 
-      experienceRequired:
-        Number(form.experience),
+        jobType:
+          normalizeEnum(
+            form.jobType,
+          ),
 
-      educationRequired:
-        form.education.trim(),
+        jobLevel:
+          normalizeEnum(
+            form.jobLevel,
+          ),
 
-      vacancies:
-        Number(form.vacancy),
+        experienceRequired:
+          Number(form.experience),
 
-      applicationDeadline:
-        null,
+        educationRequired:
+          form.education.trim(),
 
-      featured: false,
+        vacancies:
+          Number(form.vacancy),
 
-      urgent: false,
+        applicationDeadline,
 
-      requiredSkills:
-        skills,
+        featured: false,
 
-      benefits: [],
-    };
+        urgent: false,
+
+        requiredSkills:
+          skills,
+
+        benefits: [],
+      } as JobRequest;
 
     return payload;
   }
@@ -494,7 +551,11 @@ export function PostJobForm() {
 
       console.log(
         "POST /jobs payload:",
-        payload,
+        JSON.stringify(
+          payload,
+          null,
+          2,
+        ),
       );
 
       const response =
@@ -555,9 +616,7 @@ export function PostJobForm() {
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-      {/* ======================================================
-          BASIC INFORMATION
-      ====================================================== */}
+      {/* BASIC INFORMATION */}
 
       <JobBasicInfo
         form={{
@@ -574,9 +633,7 @@ export function PostJobForm() {
         }
       />
 
-      {/* ======================================================
-          JOB DETAILS
-      ====================================================== */}
+      {/* JOB DETAILS */}
 
       <JobDetails
         form={{
@@ -595,6 +652,9 @@ export function PostJobForm() {
           salaryMax:
             form.salaryMax,
 
+          applicationDeadline:
+            form.applicationDeadline,
+
           jobType:
             form.jobType,
 
@@ -606,15 +666,15 @@ export function PostJobForm() {
         }
       />
 
-      {/* ======================================================
-          REQUIREMENTS
-      ====================================================== */}
+      {/* REQUIREMENTS */}
 
       <JobRequirements
         responsibilities={
           form.responsibilities
         }
-        skills={form.skills}
+        skills={
+          form.skills
+        }
         specifications={
           form.specifications
         }
@@ -629,9 +689,7 @@ export function PostJobForm() {
         }
       />
 
-      {/* ======================================================
-          API INFORMATION
-      ====================================================== */}
+      {/* API INFORMATION */}
 
       <div className="flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
         <CheckCircle2
@@ -650,13 +708,9 @@ export function PostJobForm() {
         </div>
       </div>
 
-      {/* ======================================================
-          ACTIONS
-      ====================================================== */}
+      {/* ACTIONS */}
 
       <div className="flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        {/* Cancel */}
-
         <Button
           type="button"
           variant="ghost"
@@ -672,8 +726,6 @@ export function PostJobForm() {
         >
           Cancel
         </Button>
-
-        {/* Submit */}
 
         <Button
           type="submit"

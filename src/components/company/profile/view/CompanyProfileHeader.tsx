@@ -42,7 +42,7 @@ export function CompanyProfileHeader({
     router.push(
       profileExists
         ? routes.company.profile.edit
-        : routes.company.profile.add,
+        : routes.company.profile.edit,
     );
   };
 

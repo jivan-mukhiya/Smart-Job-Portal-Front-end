@@ -11,11 +11,9 @@ import type {
 
 export const companyService = {
   // ============================================================
-  // GET ALL COMPANIES
-  //
+  // ADMIN
   // GET /companies?page=0&size=20
-  //
-  // ADMIN ONLY
+  // Returns ALL companies
   // ============================================================
 
   getCompanies(
@@ -26,7 +24,6 @@ export const companyService = {
       api.companies.all,
       {
         method: "GET",
-
         params: {
           page,
           size,
@@ -36,11 +33,9 @@ export const companyService = {
   },
 
   // ============================================================
-  // GET ACTIVE COMPANIES
-  //
+  // PUBLIC
   // GET /companies/active?page=0&size=20
-  //
-  // PUBLIC / ACTIVE COMPANIES
+  // Returns only active companies
   // ============================================================
 
   getActiveCompanies(
@@ -51,7 +46,6 @@ export const companyService = {
       api.companies.active,
       {
         method: "GET",
-
         params: {
           page,
           size,
@@ -61,11 +55,8 @@ export const companyService = {
   },
 
   // ============================================================
-  // GET MY COMPANY
-  //
+  // COMPANY
   // GET /companies/me
-  //
-  // LOGGED-IN COMPANY
   // ============================================================
 
   getMyCompany(): Promise<CompanyResponse> {
@@ -78,9 +69,8 @@ export const companyService = {
   },
 
   // ============================================================
-  // GET COMPANY BY ID
-  //
-  // GET /companies/{companyId}
+  // PUBLIC / AUTHENTICATED
+  // GET /companies/{id}
   // ============================================================
 
   getCompanyById(
@@ -95,8 +85,7 @@ export const companyService = {
   },
 
   // ============================================================
-  // CREATE COMPANY
-  //
+  // COMPANY
   // POST /companies
   // ============================================================
 
@@ -107,16 +96,14 @@ export const companyService = {
       api.companies.create,
       {
         method: "POST",
-
         data: formData,
       },
     );
   },
 
   // ============================================================
-  // UPDATE COMPANY
-  //
-  // PUT /companies/{companyId}
+  // COMPANY
+  // PUT /companies/{id}
   // ============================================================
 
   updateCompany(
@@ -127,29 +114,14 @@ export const companyService = {
       api.companies.update(id),
       {
         method: "PUT",
-
         data: formData,
       },
     );
   },
 
   // ============================================================
-  // UPDATE COMPANY STATUS
-  //
-  // PATCH /companies/{companyId}/status
-  //
-  // Body:
-  //
-  // {
-  //   "status": "APPROVED"
-  // }
-  //
-  // Possible:
-  //
-  // PENDING
-  // APPROVED
-  // REJECTED
-  // SUSPENDED
+  // ADMIN
+  // PATCH /companies/{id}/status
   // ============================================================
 
   updateCompanyStatus(
@@ -160,7 +132,6 @@ export const companyService = {
       api.companies.status(id),
       {
         method: "PATCH",
-
         data: {
           status,
         },
