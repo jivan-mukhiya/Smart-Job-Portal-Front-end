@@ -1,229 +1,275 @@
-  export const api = {
-    // ============================================================
-    // AUTH
-    // ============================================================
+export const api = {
+  // ============================================================
+  // AUTHENTICATION
+  // ============================================================
 
-    auth: {
-      // POST /auth/login
-      login: "/auth/login",
+  auth: {
+    login: "/auth/login",
 
-      // POST /auth/register
-      register: "/auth/register",
+    register: "/auth/register",
 
-      // POST /auth/refresh
-      refresh: "/auth/refresh",
+    refresh: "/auth/refresh",
 
-      // POST /auth/logout
-      logout: "/auth/logout",
-    },
+    logout: "/auth/logout",
+  },
 
-    // ============================================================
-    // PUBLIC / COMPANY DASHBOARD
-    // ============================================================
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
 
-    dashboard: {
-      // GET /dashboard/statistics
-      statistics: "/dashboard/statistics",
+  dashboard: {
+    statistics: "/dashboard/statistics",
 
-      // GET /dashboard/company/hiring-overview
-      companyHiringOverview:
-        "/dashboard/company/hiring-overview",
-    },
+    companyHiringOverview:
+      "/dashboard/company/hiring-overview",
+  },
 
-    // ============================================================
-    // ADMIN DASHBOARD
-    // ============================================================
+  // ============================================================
+  // ADMIN DASHBOARD
+  // ============================================================
 
-    adminDashboard: {
-      // GET /admin/dashboard/statistics
-      statistics:
-        "/admin/dashboard/statistics",
-    },
+  adminDashboard: {
+    statistics: "/admin/dashboard/statistics",
+  },
 
-    // ============================================================
-    // USERS
-    // ============================================================
+  // ============================================================
+  // USERS
+  // ============================================================
 
-    users: {
-      // GET /users?page=0&size=20
-      all: "/users",
+  users: {
+    all: "/users",
 
-      // GET /users/{userId}
-      byId: (id: number | string) =>
-        `/users/${id}`,
+    byId: (id: number | string) =>
+      `/users/${id}`,
 
-      // DELETE /users/{userId}
-      delete: (id: number | string) =>
-        `/users/${id}`,
-    },
+    delete: (id: number | string) =>
+      `/users/${id}`,
+  },
 
-    // ============================================================
-    // JOBS
-    // ============================================================
+  // ============================================================
+  // JOBS
+  // ============================================================
 
-    jobs: {
-      // GET /jobs
-      all: "/jobs",
+  jobs: {
+    // GET /jobs
+    all: "/jobs",
 
-      // GET /jobs/search
-      search: "/jobs/search",
+    // GET /jobs/search
+    search: "/jobs/search",
 
-      // GET /jobs/published
-      published: "/jobs/published",
+    // GET /jobs/published
+    //
+    // Public searchable jobs:
+    // /jobs/published?page=0&size=20&search=java
+    //
+    published: "/jobs/published",
 
-      // GET /jobs/me
-      me: "/jobs/me",
+    // GET /jobs/me
+    //
+    // Company's own jobs:
+    // /jobs/me?page=0&size=20&search=java
+    //
+    me: "/jobs/me",
 
-      // GET /jobs/{jobId}
-      // PUT /jobs/{jobId}
-      // DELETE /jobs/{jobId}
-      byId: (id: number | string) =>
-        `/jobs/${id}`,
+    // GET /jobs/{jobId}
+    byId: (id: number | string) =>
+      `/jobs/${id}`,
 
-      // PATCH /jobs/{jobId}/publish
-      publish: (id: number | string) =>
-        `/jobs/${id}/publish`,
+    // PATCH /jobs/{jobId}/publish
+    publish: (id: number | string) =>
+      `/jobs/${id}/publish`,
 
-      // PATCH /jobs/{jobId}/close
-      close: (id: number | string) =>
-        `/jobs/${id}/close`,
+    // PATCH /jobs/{jobId}/close
+    close: (id: number | string) =>
+      `/jobs/${id}/close`,
 
-      // PATCH /jobs/{jobId}/status?status={status}
-      status: (id: number | string) =>
-        `/jobs/${id}/status`,
+    // PATCH /jobs/{jobId}/status
+    status: (id: number | string) =>
+      `/jobs/${id}/status`,
 
-      // GET /jobs/company/{companyId}
-      byCompany: (companyId: number | string) =>
-        `/jobs/company/${companyId}`,
-    },
+    // GET /jobs/company/{companyId}
+    byCompany: (companyId: number | string) =>
+      `/jobs/company/${companyId}`,
+  },
 
-    // ============================================================
-    // COMPANIES
-    // ============================================================
+  // ============================================================
+  // JOB RECOMMENDATIONS
+  // ============================================================
 
-    companies: {
-      // ==========================================================
-      // ADMIN / ALL COMPANIES
-      //
-      // GET /companies?page=0&size=20
-      //
-      // Protected endpoint.
-      // Use this for ADMIN company management.
-      // ==========================================================
-      all: "/companies",
+  // Protected backend endpoint:
+  //
+  // GET /recommendations/jobs
+  //
+  // Only JOB_SEEKER can access this endpoint.
+  //
+  // Example:
+  // /recommendations/jobs?page=0&size=10
+  //
+  // Search:
+  // /recommendations/jobs?page=0&size=10&search=java
 
-      // ==========================================================
-      // ACTIVE COMPANIES
-      //
-      // GET /companies/active?page=0&size=20
-      //
-      // Use this for active/public company listing.
-      // ==========================================================
-      active: "/companies/active",
+  recommendations: {
+    jobs: "/recommendations/jobs",
+  },
 
-      // ==========================================================
-      // MY COMPANY
-      //
-      // GET /companies/me
-      //
-      // Use this for the currently logged-in COMPANY.
-      // ==========================================================
-      me: "/companies/me",
+  // ============================================================
+  // COMPANIES
+  // ============================================================
 
-      // ==========================================================
-      // CREATE COMPANY
-      //
-      // POST /companies
-      // ==========================================================
-      create: "/companies",
+  companies: {
+    // GET /companies
+    //
+    // ADMIN only
+    //
+    all: "/companies",
 
-      // ==========================================================
-      // COMPANY BY ID
-      //
-      // GET /companies/{companyId}
-      // ==========================================================
-      byId: (id: number | string) =>
-        `/companies/${id}`,
+    // GET /companies/active
+    //
+    // Public active companies
+    //
+    active: "/companies/active",
 
-      // ==========================================================
-      // UPDATE COMPANY
-      //
-      // PUT /companies/{companyId}
-      // ==========================================================
-      update: (id: number | string) =>
-        `/companies/${id}`,
+    // GET /companies/me
+    //
+    // Logged-in company
+    //
+    me: "/companies/me",
 
-      // ==========================================================
-      // UPDATE COMPANY STATUS
-      //
-      // PATCH /companies/{companyId}/status
-      // ==========================================================
-      status: (id: number | string) =>
-        `/companies/${id}/status`,
-    },
+    // POST /companies
+    create: "/companies",
 
-    // ============================================================
-    // JOB SEEKERS
-    // ============================================================
+    // GET /companies/{companyId}
+    //
+    // Public / authenticated depending on backend security
+    //
+    byId: (id: number | string) =>
+      `/companies/${id}`,
 
-    jobseekers: {
-      // GET /job-seekers
-      all: "/job-seekers",
+    // GET /companies/{companyId}/logo
+    //
+    // Public company logo
+    //
+    // Example:
+    // /companies/4/logo
+    //
+    logo: (id: number | string) =>
+      `/companies/${id}/logo`,
 
-      // GET /job-seekers/me
-      me: "/job-seekers/me",
+    // PUT /companies/{companyId}
+    update: (id: number | string) =>
+      `/companies/${id}`,
 
-      // GET /job-seekers/{jobSeekerId}
-      byId: (id: number | string) =>
-        `/job-seekers/${id}`,
+    // PATCH /companies/{companyId}/status
+    //
+    // ADMIN only
+    //
+    status: (id: number | string) =>
+      `/companies/${id}/status`,
+  },
 
-      // GET /job-seekers/me/resume
-      // PUT /job-seekers/me/resume
-      // DELETE /job-seekers/me/resume
-      resume: "/job-seekers/me/resume",
+  // ============================================================
+  // JOB SEEKERS
+  // ============================================================
 
-      // PUT /job-seekers/me/resume-url
-      resumeUrl:
-        "/job-seekers/me/resume-url",
-    },
+  jobseekers: {
+    // GET /job-seekers
+    //
+    // ADMIN only
+    //
+    all: "/job-seekers",
 
-    // ============================================================
-    // APPLICATIONS
-    // ============================================================
+    // GET /job-seekers/me
+    //
+    // Logged-in job seeker
+    //
+    me: "/job-seekers/me",
 
-    applications: {
-      // Jobseeker applies for a job
-      apply: (jobId: number | string) =>
-        `/applications/jobs/${jobId}`,
+    // GET /job-seekers/me/profile-image
+    //
+    // Logged-in job seeker's profile image
+    //
+    // Returns:
+    // {
+    //   success: true,
+    //   message: "...",
+    //   data: "http://localhost:9000/api/v1/files/uploads/jobseeker/profile/...",
+    //   timestamp: "..."
+    // }
+    //
+    profileImage: "/job-seekers/me/profile-image",
 
-      // Jobseeker's own applications
-      me: "/applications/me",
+    // GET /job-seekers/{id}
+    byId: (id: number | string) =>
+      `/job-seekers/${id}`,
 
-      // Company's received applications
-      company: "/applications/company",
+    // Upload / replace resume
+    //
+    // PUT /job-seekers/me/resume
+    //
+    resume: "/job-seekers/me/resume",
 
-      // Company's single application
-      companyById: (
-        applicationId: number | string,
-      ) =>
-        `/applications/company/${applicationId}`,
+    // Resume URL
+    //
+    // PUT /job-seekers/me/resume-url
+    //
+    resumeUrl: "/job-seekers/me/resume-url",
+  },
 
-      // Generic application by ID
-      byId: (
-        applicationId: number | string,
-      ) =>
-        `/applications/${applicationId}`,
+  // ============================================================
+  // APPLICATIONS
+  // ============================================================
 
-      // Jobseeker withdraws application
-      withdraw: (
-        applicationId: number | string,
-      ) =>
-        `/applications/me/${applicationId}/withdraw`,
+  applications: {
+    // POST /applications/jobs/{jobId}
+    //
+    // Job seeker applies for a job
+    //
+    apply: (jobId: number | string) =>
+      `/applications/jobs/${jobId}`,
 
-      // Company changes application status
-      updateStatus: (
-        applicationId: number | string,
-      ) =>
-        `/applications/${applicationId}/status`,
-    },
-  } as const;
+    // GET /applications/me
+    //
+    // Job seeker's own applications
+    //
+    me: "/applications/me",
+
+    // GET /applications/company
+    //
+    // Company's received applications
+    //
+    company: "/applications/company",
+
+    // GET /applications/company/{applicationId}
+    //
+    // Company application detail
+    //
+    companyById: (
+      applicationId: number | string,
+    ) =>
+      `/applications/company/${applicationId}`,
+
+    // GET /applications/{applicationId}
+    byId: (
+      applicationId: number | string,
+    ) =>
+      `/applications/${applicationId}`,
+
+    // PATCH/PUT /applications/me/{applicationId}/withdraw
+    //
+    // Job seeker withdraws application
+    //
+    withdraw: (
+      applicationId: number | string,
+    ) =>
+      `/applications/me/${applicationId}/withdraw`,
+
+    // PATCH /applications/{applicationId}/status
+    //
+    // Company updates application status
+    //
+    updateStatus: (
+      applicationId: number | string,
+    ) =>
+      `/applications/${applicationId}/status`,
+  },
+} as const;

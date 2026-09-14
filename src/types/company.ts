@@ -4,6 +4,10 @@ export type CompanyStatus =
   | "REJECTED"
   | "SUSPENDED";
 
+/* ============================================================
+   COMPANY ADDRESS
+============================================================ */
+
 export interface CompanyAddress {
   addressLine: string | null;
   city: string | null;
@@ -11,6 +15,10 @@ export interface CompanyAddress {
   country: string | null;
   postalCode: string | null;
 }
+
+/* ============================================================
+   COMPANY IMAGES
+============================================================ */
 
 export interface CompanyImages {
   logoPath: string | null;
@@ -27,6 +35,10 @@ export interface CompanyImages {
   bannerUrl: string | null;
 }
 
+/* ============================================================
+   COMPANY STATISTICS
+============================================================ */
+
 export interface CompanyStatistics {
   profileViews: number;
   followers: number;
@@ -36,6 +48,10 @@ export interface CompanyStatistics {
   averageRating: number;
 }
 
+/* ============================================================
+   COMPANY SOCIAL LINK
+============================================================ */
+
 export interface CompanySocialLink {
   id: number;
   platform: string;
@@ -43,6 +59,10 @@ export interface CompanySocialLink {
   active: boolean;
   displayOrder: number;
 }
+
+/* ============================================================
+   COMPANY
+============================================================ */
 
 export interface Company {
   id: number;
@@ -78,6 +98,10 @@ export interface Company {
   updatedAt: string;
 }
 
+/* ============================================================
+   COMPANY PAGE DATA
+============================================================ */
+
 export interface CompanyPageData {
   content: Company[];
 
@@ -96,6 +120,10 @@ export interface CompanyPageData {
   empty: boolean;
 }
 
+/* ============================================================
+   COMPANY RESPONSE
+============================================================ */
+
 export interface CompanyResponse {
   success: boolean;
 
@@ -105,6 +133,10 @@ export interface CompanyResponse {
 
   timestamp?: string;
 }
+
+/* ============================================================
+   COMPANIES RESPONSE
+============================================================ */
 
 export interface CompaniesResponse {
   success: boolean;
@@ -123,9 +155,17 @@ export interface CompaniesResponse {
 export type ActiveCompaniesResponse =
   CompaniesResponse;
 
+/* ============================================================
+   COMPANY STATUS UPDATE REQUEST
+============================================================ */
+
 export interface CompanyStatusUpdateRequest {
   status: CompanyStatus;
 }
+
+/* ============================================================
+   COMPANY STATUS RESPONSE
+============================================================ */
 
 export interface CompanyStatusResponse {
   success: boolean;
@@ -133,6 +173,32 @@ export interface CompanyStatusResponse {
   message: string;
 
   data: Company | null;
+
+  timestamp?: string;
+}
+
+/* ============================================================
+   COMPANY LOGO RESPONSE
+============================================================ */
+
+/**
+ * GET /companies/{companyId}/logo
+ *
+ * Backend returns:
+ *
+ * {
+ *   "success": true,
+ *   "message": "Company logo retrieved successfully",
+ *   "data": "http://localhost:9000/api/v1/files/uploads/company/logo/....jpg",
+ *   "timestamp": "..."
+ * }
+ */
+export interface CompanyLogoResponse {
+  success: boolean;
+
+  message: string;
+
+  data: string | null;
 
   timestamp?: string;
 }

@@ -12,9 +12,12 @@ import {
 import { authStorage } from "@/lib/auth-storage";
 
 
+/* =============================================================
+   AXIOS INSTANCE
+============================================================= */
+
 const apiClientInstance = axios.create({
   baseURL: env.apiUrl,
-
   withCredentials: true,
 });
 
@@ -29,17 +32,11 @@ apiClientInstance.interceptors.request.use(
     const token =
       authStorage.getAccessToken();
 
-
     const isLoginRequest =
-      config.url?.includes(
-        "/auth/login"
-      );
-
+      config.url?.includes("/auth/login");
 
     const isRegisterRequest =
-      config.url?.includes(
-        "/auth/register"
-      );
+      config.url?.includes("/auth/register");
 
 
     if (
@@ -48,14 +45,38 @@ apiClientInstance.interceptors.request.use(
       !isRegisterRequest
     ) {
 
+      config.headers =
+        config.headers || {};
+
       config.headers.Authorization =
         `Bearer ${token}`;
+    }
 
+
+    /* =========================================================
+       DEVELOPMENT DEBUG
+    ========================================================= */
+
+    if (process.env.NODE_ENV === "development") {
+
+      console.log(
+        "[API REQUEST]",
+        {
+          method: config.method,
+          url: config.baseURL
+            ? `${config.baseURL}${config.url}`
+            : config.url,
+          hasToken: Boolean(token),
+        }
+      );
     }
 
 
     return config;
 
+  },
+  (error) => {
+    return Promise.reject(error);
   }
 );
 
@@ -78,9 +99,35 @@ export async function apiClient<T>(
       });
 
 
+    /* =========================================================
+       DEVELOPMENT DEBUG
+    ========================================================= */
+
+    if (process.env.NODE_ENV === "development") {
+
+      console.log(
+        "[API RESPONSE]",
+        {
+          status: response.status,
+          url: endpoint,
+          data: response.data,
+        }
+      );
+    }
+
+
     return response.data;
 
   } catch (error: unknown) {
+
+    /* =========================================================
+       ALREADY ApiError
+    ========================================================= */
+
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
 
     /* =========================================================
        AXIOS ERROR
@@ -89,44 +136,117 @@ export async function apiClient<T>(
     if (axios.isAxiosError(error)) {
 
       const responseData =
-        error.response?.data as
-          | ApiErrorResponse
-          | undefined;
+        error.response?.data;
+
+
+      const status =
+        error.response?.status ?? 0;
 
 
       /* =======================================================
-         BACKEND ERROR RESPONSE
+         DEVELOPMENT DEBUG
       ======================================================= */
 
-      if (responseData) {
+      if (process.env.NODE_ENV === "development") {
 
-        const status =
-          responseData.status ??
-          error.response?.status ??
-          500;
+        console.error(
+          "[API ERROR]",
+          {
+            endpoint,
+            status,
+            response: responseData,
+            axiosMessage: error.message,
+          }
+        );
+      }
 
+
+      /* =======================================================
+         NO RESPONSE = NETWORK ERROR
+      ======================================================= */
+
+      if (!error.response) {
+
+        throw new ApiError(
+          "Unable to connect to the server. Please check that the backend server is running.",
+          0,
+          "NETWORK_ERROR",
+          "NETWORK_ERROR",
+          []
+        );
+      }
+
+
+      /* =======================================================
+         BACKEND RESPONSE
+      ======================================================= */
+
+      if (
+        responseData &&
+        typeof responseData === "object"
+      ) {
+
+        const data =
+          responseData as ApiErrorResponse & {
+            detail?: string;
+            title?: string;
+            errorMessage?: string;
+          };
+
+
+        /* =====================================================
+           GET BEST AVAILABLE MESSAGE
+        ===================================================== */
 
         const message =
-          responseData.message ||
-          responseData.error ||
+          data.message ||
+          data.errorMessage ||
+          data.detail ||
+          (
+            typeof data.error === "string"
+              ? data.error
+              : undefined
+          ) ||
           error.message ||
-          "Something went wrong.";
+          `Request failed with status ${status}.`;
 
+
+        /* =====================================================
+           ERROR CODE
+        ===================================================== */
 
         const code =
-          responseData.code ||
-          "UNKNOWN_ERROR";
+          data.code ||
+          (
+            typeof data.error === "string"
+              ? data.error
+              : undefined
+          ) ||
+          "HTTP_ERROR";
 
+
+        /* =====================================================
+           ERROR NAME / TYPE
+        ===================================================== */
 
         const errorCode =
-          responseData.error ||
-          responseData.code ||
-          "UNKNOWN_ERROR";
+          (
+            typeof data.error === "string"
+              ? data.error
+              : undefined
+          ) ||
+          data.code ||
+          "HTTP_ERROR";
 
+
+        /* =====================================================
+           VALIDATION ERRORS
+        ===================================================== */
 
         const errors =
-          responseData.errors ||
-          [];
+          Array.isArray(data.errors)
+            ? data.errors
+            : [];
 
 
         throw new ApiError(
@@ -135,28 +255,31 @@ export async function apiClient<T>(
           code,
           errorCode,
           errors,
-          responseData.error,
-          responseData.path,
-          responseData.timestamp
+          typeof data.error === "string"
+            ? data.error
+            : undefined,
+          data.path,
+          data.timestamp
         );
-
       }
 
 
       /* =======================================================
-         NETWORK ERROR
+         STRING BACKEND RESPONSE
       ======================================================= */
 
-      if (!error.response) {
+      if (
+        typeof responseData === "string" &&
+        responseData.trim()
+      ) {
 
         throw new ApiError(
-          "Unable to connect to the server. Please check your internet connection.",
-          0,
-          "NETWORK_ERROR",
-          "NETWORK_ERROR",
+          responseData,
+          status,
+          "HTTP_ERROR",
+          "HTTP_ERROR",
           []
         );
-
       }
 
 
@@ -164,26 +287,40 @@ export async function apiClient<T>(
          UNKNOWN HTTP ERROR
       ======================================================= */
 
-      throw new ApiError(
+      let message =
         error.message ||
-          "Something went wrong.",
-        error.response.status,
-        "UNKNOWN_ERROR",
-        "UNKNOWN_ERROR",
+        "Something went wrong.";
+
+
+      if (status === 401) {
+
+        message =
+          "Your session has expired. Please login again.";
+
+      } else if (status === 403) {
+
+        message =
+          "You do not have permission to access this resource.";
+
+      } else if (status === 404) {
+
+        message =
+          "The requested resource was not found.";
+
+      } else if (status >= 500) {
+
+        message =
+          "Server error. Please try again later.";
+      }
+
+
+      throw new ApiError(
+        message,
+        status,
+        "HTTP_ERROR",
+        "HTTP_ERROR",
         []
       );
-
-    }
-
-
-    /* =========================================================
-       ALREADY ApiError
-    ========================================================= */
-
-    if (error instanceof ApiError) {
-
-      throw error;
-
     }
 
 
@@ -201,12 +338,11 @@ export async function apiClient<T>(
         "CLIENT_ERROR",
         []
       );
-
     }
 
 
     /* =========================================================
-       UNKNOWN / FALLBACK ERROR
+       UNKNOWN ERROR
     ========================================================= */
 
     throw new ApiError(
@@ -216,6 +352,12 @@ export async function apiClient<T>(
       "UNKNOWN_ERROR",
       []
     );
-
   }
 }
+
+
+/* =============================================================
+   EXPORT AXIOS INSTANCE
+============================================================= */
+
+export { apiClientInstance };

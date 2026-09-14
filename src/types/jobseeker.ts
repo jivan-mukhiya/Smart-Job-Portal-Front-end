@@ -3,17 +3,23 @@
 ========================================================= */
 
 export interface JobSeekerProfileImage {
-  id: number;
-
+  id: number | null;
   imagePath: string | null;
-
   fileName: string | null;
-
   fileSize: string | null;
-
   contentType: string | null;
-
   imageUrl: string | null;
+}
+
+/* =========================================================
+   JOB SEEKER PROFILE IMAGE API RESPONSE
+========================================================= */
+
+export interface JobSeekerProfileImageResponse {
+  success: boolean;
+  message: string;
+  data: string | null;
+  timestamp?: string;
 }
 
 /* =========================================================
@@ -22,17 +28,11 @@ export interface JobSeekerProfileImage {
 
 export interface JobSeekerResume {
   id: number;
-
   resumeUrl: string | null;
-
   filePath: string | null;
-
   fileName: string | null;
-
   fileSize: string | null;
-
   contentType: string | null;
-
   fileUrl: string | null;
 }
 
@@ -42,11 +42,8 @@ export interface JobSeekerResume {
 
 export interface JobSeekerSkill {
   id: number;
-
   skillName: string;
-
   active: boolean;
-
   displayOrder: number;
 }
 
@@ -56,11 +53,8 @@ export interface JobSeekerSkill {
 
 export interface JobSeekerSocialProfile {
   id: number;
-
   platform: string;
-
   url: string;
-
   active: boolean;
 }
 
@@ -70,23 +64,14 @@ export interface JobSeekerSocialProfile {
 
 export interface JobSeekerProfile {
   id: number;
-
   userId: number;
-
   fullName: string;
-
   email: string;
-
   phone: string | null;
-
   professionalTitle: string | null;
-
   about: string | null;
-
   address: string | null;
-
   yearsOfExperience: number | null;
-
   highestEducation: string | null;
 
   profileImage: JobSeekerProfileImage | null;
@@ -100,7 +85,6 @@ export interface JobSeekerProfile {
   socialProfiles: JobSeekerSocialProfile[];
 
   createdAt: string;
-
   updatedAt: string;
 }
 
@@ -110,10 +94,7 @@ export interface JobSeekerProfile {
 
 export interface JobSeekerProfileResponse {
   success: boolean;
-
   message: string;
-
   data: JobSeekerProfile;
-
   timestamp?: string;
 }

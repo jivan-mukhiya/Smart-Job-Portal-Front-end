@@ -46,23 +46,6 @@ export function DashboardHeader() {
       ===================================================== */}
 
       <div className="flex items-center gap-3">
-
-        {/* Notifications */}
-
-        <button
-          type="button"
-          className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
-          aria-label="Notifications"
-        >
-          <Bell size={18} />
-
-          <span
-            className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"
-            aria-hidden="true"
-          />
-        </button>
-
-
         {/* Company */}
 
         <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">

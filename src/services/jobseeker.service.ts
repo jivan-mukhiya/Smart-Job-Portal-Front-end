@@ -3,6 +3,7 @@ import { apiClient } from "@/lib/api-client";
 
 import type {
   JobSeekerProfileResponse,
+  JobSeekerProfileImageResponse,
 } from "@/types/jobseeker";
 
 import type {
@@ -20,6 +21,29 @@ export const jobSeekerService = {
   getMyProfile(): Promise<JobSeekerProfileResponse> {
     return apiClient<JobSeekerProfileResponse>(
       api.jobseekers.me,
+      {
+        method: "GET",
+      },
+    );
+  },
+
+  /* =========================================================
+     GET MY PROFILE IMAGE
+
+     GET /job-seekers/me/profile-image
+
+     Response:
+     {
+       success: true,
+       message: "...",
+       data: "http://localhost:9000/api/v1/files/uploads/...",
+       timestamp: "..."
+     }
+  ========================================================= */
+
+  getMyProfileImage(): Promise<JobSeekerProfileImageResponse> {
+    return apiClient<JobSeekerProfileImageResponse>(
+      api.jobseekers.profileImage,
       {
         method: "GET",
       },

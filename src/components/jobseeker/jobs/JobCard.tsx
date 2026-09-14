@@ -1,4 +1,5 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 
 import {
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { routes } from "@/config/routes";
+import { useCompanyLogo } from "@/hooks/use-company-logo";
 
 import type { Job } from "@/types/job";
 
@@ -99,6 +101,48 @@ function getSalary(job: Job): string {
 export function JobCard({
   job,
 }: JobCardProps) {
+  /**
+   * If Job API already contains companyLogo,
+   * don't make another logo API request.
+   *
+   * Otherwise fetch:
+   * GET /companies/{companyId}/logo
+   */
+  const {
+    logoUrl: fetchedCompanyLogo,
+    loading: logoLoading,
+  } = useCompanyLogo(
+    job.companyLogo
+      ? null
+      : job.companyId,
+  );
+
+  /**
+   * Priority:
+   *
+   * 1. Logo coming with Job API
+   * 2. Logo fetched from Company Logo API
+   */
+  const companyLogo =
+    job.companyLogo ||
+    fetchedCompanyLogo ||
+    null;
+
+  /**
+   * Pass the logo to the job details page.
+   *
+   * encodeURIComponent is ONLY used for putting
+   * the URL inside the query parameter.
+   *
+   * It will be decoded automatically by
+   * useSearchParams().get().
+   */
+  const jobDetailUrl = companyLogo
+    ? `${routes.jobs.all}/${job.id}?companyLogo=${encodeURIComponent(
+        companyLogo,
+      )}`
+    : `${routes.jobs.all}/${job.id}`;
+
   const skills = [
     ...(job.requiredSkills ?? []),
   ]
@@ -111,25 +155,38 @@ export function JobCard({
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-      {/* Header */}
+      {/* ===================================================== */}
+      {/* HEADER */}
+      {/* ===================================================== */}
+
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 gap-4">
-          {/* Company Logo */}
-          <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-700">
-            {job.companyLogo ? (
-              <Image
-                src={job.companyLogo}
+          {/* ================================================= */}
+          {/* COMPANY LOGO */}
+          {/* ================================================= */}
+
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100 text-slate-700">
+            {companyLogo ? (
+              <img
+                src={companyLogo}
                 alt={`${job.companyName ?? "Company"} logo`}
-                fill
-                sizes="48px"
-                className="object-cover"
+                className="h-full w-full object-cover"
+                onError={(event) => {
+                  event.currentTarget.style.display =
+                    "none";
+                }}
               />
+            ) : logoLoading ? (
+              <div className="h-full w-full animate-pulse bg-slate-200" />
             ) : (
               <Building2 size={23} />
             )}
           </div>
 
-          {/* Job Information */}
+          {/* ================================================= */}
+          {/* JOB / COMPANY NAME */}
+          {/* ================================================= */}
+
           <div className="min-w-0">
             <h3 className="truncate font-bold text-slate-950">
               {job.title ??
@@ -143,7 +200,10 @@ export function JobCard({
           </div>
         </div>
 
-        {/* Save Job */}
+        {/* =================================================== */}
+        {/* SAVE */}
+        {/* =================================================== */}
+
         <button
           type="button"
           aria-label={`Save ${
@@ -155,7 +215,10 @@ export function JobCard({
         </button>
       </div>
 
-      {/* Job Details */}
+      {/* ===================================================== */}
+      {/* JOB META */}
+      {/* ===================================================== */}
+
       <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500">
         {job.location && (
           <span className="flex items-center gap-1.5">
@@ -181,7 +244,10 @@ export function JobCard({
         </span>
       </div>
 
-      {/* Skills */}
+      {/* ===================================================== */}
+      {/* SKILLS */}
+      {/* ===================================================== */}
+
       {skills.length > 0 && (
         <div className="mt-5 flex flex-wrap gap-2">
           {skills.map((skill) => (
@@ -195,18 +261,20 @@ export function JobCard({
         </div>
       )}
 
-      {/* Footer */}
+      {/* ===================================================== */}
+      {/* FOOTER */}
+      {/* ===================================================== */}
+
       <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-5">
         <p className="text-sm font-semibold text-slate-950">
           {getSalary(job)}
         </p>
 
         <Link
-          href={`${routes.jobs.all}/${job.id}`}
+          href={jobDetailUrl}
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 transition-colors hover:text-slate-950"
         >
           View job
-
           <ArrowRight size={15} />
         </Link>
       </div>

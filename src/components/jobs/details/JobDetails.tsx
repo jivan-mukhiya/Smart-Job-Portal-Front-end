@@ -47,6 +47,7 @@ export function JobDetails({
 
                 <div className="flex-1 space-y-3">
                   <div className="h-8 w-2/3 rounded bg-slate-200" />
+
                   <div className="h-4 w-1/3 rounded bg-slate-200" />
                 </div>
               </div>
@@ -124,29 +125,75 @@ export function JobDetails({
      DATA
   ========================================================= */
 
-  const skills = [...(job.requiredSkills ?? [])].sort(
-    (a, b) => a.displayOrder - b.displayOrder,
+  const skills = [
+    ...(job.requiredSkills ?? []),
+  ].sort(
+    (a, b) =>
+      a.displayOrder -
+      b.displayOrder,
   );
 
-  const benefits = [...(job.benefits ?? [])].sort(
-    (a, b) => a.displayOrder - b.displayOrder,
+  const benefits = [
+    ...(job.benefits ?? []),
+  ].sort(
+    (a, b) =>
+      a.displayOrder -
+      b.displayOrder,
   );
 
   return (
     <main className="min-h-screen bg-slate-50">
+
       {/* =====================================================
           JOB HEADER
       ===================================================== */}
 
       <JobHeader
-        title={job.title ?? "Untitled Job"}
-        companyName={
-          job.companyName ?? "Unknown Company"
+        title={
+          job.title ?? "Untitled Job"
         }
-        location={job.location ?? "Location not specified"}
-        status={job.status ?? "UNKNOWN"}
-        jobType={formatEnum(job.jobType)}
-        jobLevel={formatEnum(job.jobLevel)}
+
+        companyName={
+          job.companyName ??
+          "Unknown Company"
+        }
+
+        /*
+         * Pass company ID to JobHeader.
+         * This is used by useCompanyLogo()
+         * if companyLogo is unavailable.
+         */
+        companyId={
+          job.companyId
+        }
+
+        /*
+         * Pass logo returned by the job API.
+         *
+         * If this is null, JobHeader will call:
+         *
+         * GET /companies/{companyId}/logo
+         */
+        companyLogo={
+          job.companyLogo
+        }
+
+        location={
+          job.location ??
+          "Location not specified"
+        }
+
+        status={
+          job.status ?? "UNKNOWN"
+        }
+
+        jobType={formatEnum(
+          job.jobType,
+        )}
+
+        jobLevel={formatEnum(
+          job.jobLevel,
+        )}
       />
 
       {/* =====================================================
@@ -155,11 +202,13 @@ export function JobDetails({
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+
           {/* =================================================
               LEFT
           ================================================= */}
 
           <div className="space-y-6">
+
             <JobOverview
               salary={
                 job.salaryRange ??
@@ -170,16 +219,27 @@ export function JobDetails({
                   job.salaryNegotiable,
                 )
               }
+
               experience={
                 job.experienceRequired ?? 0
               }
+
               education={
                 job.educationRequired ??
                 "Not specified"
               }
-              vacancy={job.vacancies}
-              jobType={formatEnum(job.jobType)}
-              jobLevel={formatEnum(job.jobLevel)}
+
+              vacancy={
+                job.vacancies
+              }
+
+              jobType={formatEnum(
+                job.jobType,
+              )}
+
+              jobLevel={formatEnum(
+                job.jobLevel,
+              )}
             />
 
             {/* DESCRIPTION */}
@@ -204,7 +264,8 @@ export function JobDetails({
 
             <JobSkills
               skills={skills.map(
-                (skill) => skill.skillName,
+                (skill) =>
+                  skill.skillName,
               )}
             />
 
@@ -226,22 +287,30 @@ export function JobDetails({
                 </h2>
 
                 <div className="mt-5 space-y-4">
-                  {benefits.map((benefit) => (
-                    <div
-                      key={benefit.id}
-                      className="rounded-xl bg-slate-50 p-4"
-                    >
-                      <h3 className="font-semibold text-slate-900">
-                        {benefit.benefitName}
-                      </h3>
+                  {benefits.map(
+                    (benefit) => (
+                      <div
+                        key={
+                          benefit.id
+                        }
+                        className="rounded-xl bg-slate-50 p-4"
+                      >
+                        <h3 className="font-semibold text-slate-900">
+                          {
+                            benefit.benefitName
+                          }
+                        </h3>
 
-                      {benefit.description && (
-                        <p className="mt-1 text-sm leading-6 text-slate-600">
-                          {benefit.description}
-                        </p>
-                      )}
-                    </div>
-                  ))}
+                        {benefit.description && (
+                          <p className="mt-1 text-sm leading-6 text-slate-600">
+                            {
+                              benefit.description
+                            }
+                          </p>
+                        )}
+                      </div>
+                    ),
+                  )}
                 </div>
               </section>
             )}
@@ -258,14 +327,25 @@ export function JobDetails({
               </div>
 
               <div className="mt-5 grid gap-4 sm:grid-cols-2">
+
                 <InfoItem
-                  icon={<CalendarDays size={17} />}
+                  icon={
+                    <CalendarDays
+                      size={17}
+                    />
+                  }
                   label="Posted"
-                  value={formatDate(job.postedDate)}
+                  value={formatDate(
+                    job.postedDate,
+                  )}
                 />
 
                 <InfoItem
-                  icon={<Clock3 size={17} />}
+                  icon={
+                    <Clock3
+                      size={17}
+                    />
+                  }
                   label="Last Updated"
                   value={formatDate(
                     job.lastUpdatedDate,
@@ -273,7 +353,11 @@ export function JobDetails({
                 />
 
                 <InfoItem
-                  icon={<CalendarDays size={17} />}
+                  icon={
+                    <CalendarDays
+                      size={17}
+                    />
+                  }
                   label="Application Deadline"
                   value={formatDate(
                     job.applicationDeadline,
@@ -281,14 +365,20 @@ export function JobDetails({
                 />
 
                 <InfoItem
-                  icon={<Clock3 size={17} />}
+                  icon={
+                    <Clock3
+                      size={17}
+                    />
+                  }
                   label="Applications"
                   value={String(
                     job.applicationCount,
                   )}
                 />
+
               </div>
             </section>
+
           </div>
 
           {/* =================================================
@@ -296,6 +386,7 @@ export function JobDetails({
           ================================================= */}
 
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+
             <ApplyJobCard
               jobId={job.id}
               status={job.status ?? ""}
@@ -307,9 +398,13 @@ export function JobDetails({
                 job.companyName ??
                 "Unknown Company"
               }
-              companyImageUrl={job.companyLogo}
+              companyImageUrl={
+                job.companyLogo
+              }
             />
+
           </aside>
+
         </div>
       </div>
     </main>
@@ -327,7 +422,9 @@ function SkeletonCard() {
 
       <div className="mt-5 space-y-3">
         <div className="h-4 w-full rounded bg-slate-200" />
+
         <div className="h-4 w-5/6 rounded bg-slate-200" />
+
         <div className="h-4 w-2/3 rounded bg-slate-200" />
       </div>
     </div>
@@ -379,15 +476,22 @@ function formatDate(
 
   const parsed = new Date(date);
 
-  if (Number.isNaN(parsed.getTime())) {
+  if (
+    Number.isNaN(
+      parsed.getTime(),
+    )
+  ) {
     return "Not available";
   }
 
-  return parsed.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return parsed.toLocaleDateString(
+    "en-US",
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    },
+  );
 }
 
 /* =========================================================
@@ -422,23 +526,33 @@ function formatSalary(
   currency: string | null,
   negotiable: boolean,
 ): string {
-  const currencyValue = currency ?? "";
+  const currencyValue =
+    currency ?? "";
 
-  if (min !== null && max !== null) {
+  if (
+    min !== null &&
+    max !== null
+  ) {
     return `${currencyValue} ${min.toLocaleString()} - ${max.toLocaleString()}${
-      negotiable ? " (Negotiable)" : ""
+      negotiable
+        ? " (Negotiable)"
+        : ""
     }`;
   }
 
   if (min !== null) {
     return `${currencyValue} ${min.toLocaleString()}${
-      negotiable ? " (Negotiable)" : ""
+      negotiable
+        ? " (Negotiable)"
+        : ""
     }`;
   }
 
   if (max !== null) {
     return `Up to ${currencyValue} ${max.toLocaleString()}${
-      negotiable ? " (Negotiable)" : ""
+      negotiable
+        ? " (Negotiable)"
+        : ""
     }`;
   }
 

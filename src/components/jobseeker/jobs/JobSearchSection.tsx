@@ -67,7 +67,8 @@ export function JobSearchSection() {
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950">
           <div className="px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-12">
             <div className="mx-auto max-w-3xl">
-              {/* Header */}
+
+              {/* HEADER */}
               <div className="text-center">
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 text-white">
                   <BriefcaseBusiness
@@ -88,13 +89,14 @@ export function JobSearchSection() {
                 </p>
               </div>
 
-              {/* Search Form */}
+              {/* SEARCH FORM */}
               <form
                 onSubmit={handleSearch}
                 className="mt-8 rounded-2xl bg-white p-2 shadow-xl"
               >
                 <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto]">
-                  {/* Keyword */}
+
+                  {/* KEYWORD */}
                   <Input
                     value={keyword}
                     onChange={(event) =>
@@ -110,7 +112,7 @@ export function JobSearchSection() {
                     aria-label="Job title, skill or keyword"
                   />
 
-                  {/* Location */}
+                  {/* LOCATION */}
                   <Input
                     value={location}
                     onChange={(event) =>
@@ -126,7 +128,7 @@ export function JobSearchSection() {
                     aria-label="Location"
                   />
 
-                  {/* Search Button */}
+                  {/* SEARCH BUTTON */}
                   <button
                     type="submit"
                     className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-semibold text-white transition hover:bg-slate-800"
@@ -140,7 +142,7 @@ export function JobSearchSection() {
                 </div>
               </form>
 
-              {/* Quick Searches */}
+              {/* QUICK SEARCHES */}
               <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
                 <span className="mr-1 text-slate-400">
                   Popular searches:
@@ -166,6 +168,7 @@ export function JobSearchSection() {
                   keyword="Accountant"
                 />
               </div>
+
             </div>
           </div>
         </div>

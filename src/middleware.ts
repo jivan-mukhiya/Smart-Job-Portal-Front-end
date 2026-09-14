@@ -1,4 +1,3 @@
-
 import {
   NextRequest,
   NextResponse,
@@ -11,27 +10,15 @@ import { routes } from "@/config/routes";
  * CHECK JWT EXPIRATION
  * ============================================================
  *
- * JWT structure:
- *
- * header.payload.signature
- *
- * The expiration time (exp) is inside
- * the JWT payload.
- *
- * JWT exp = seconds
- * Date.now() = milliseconds
+ * JWT exp is stored in seconds.
+ * Date.now() is in milliseconds.
  */
-function isTokenExpired(
-  token: string,
-): boolean {
+function isTokenExpired(token: string): boolean {
   try {
     const parts = token.split(".");
 
-    /*
-     * A valid JWT must have:
-     *
-     * header.payload.signature
-     */
+    // JWT must contain:
+    // header.payload.signature
     if (parts.length !== 3) {
       return true;
     }
@@ -42,9 +29,6 @@ function isTokenExpired(
       return true;
     }
 
-    /*
-     * Convert Base64URL payload to JSON.
-     */
     const payload = JSON.parse(
       atob(
         payloadBase64
@@ -53,26 +37,15 @@ function isTokenExpired(
       ),
     );
 
-    /*
-     * JWT must contain exp.
-     */
-    if (
-      typeof payload.exp !== "number"
-    ) {
+    // JWT must contain exp
+    if (typeof payload.exp !== "number") {
       return true;
     }
 
-    /*
-     * Check whether JWT has expired.
-     */
-    return (
-      payload.exp * 1000 <= Date.now()
-    );
+    // Check expiration
+    return payload.exp * 1000 <= Date.now();
   } catch {
-    /*
-     * If the JWT cannot be decoded,
-     * treat it as invalid.
-     */
+    // Invalid JWT
     return true;
   }
 }
@@ -81,12 +54,6 @@ function isTokenExpired(
  * ============================================================
  * REDIRECT TO LOGIN
  * ============================================================
- *
- * This function:
- *
- * 1. Redirects user to login.
- * 2. Removes invalid authentication cookies.
- * 3. Keeps the original requested URL.
  */
 function redirectToLogin(
   request: NextRequest,
@@ -97,9 +64,8 @@ function redirectToLogin(
     request.url,
   );
 
-  /*
-   * Preserve the page the user
-   * originally wanted to visit.
+  /**
+   * Preserve requested URL.
    *
    * Example:
    *
@@ -118,21 +84,11 @@ function redirectToLogin(
   const response =
     NextResponse.redirect(loginUrl);
 
-  /*
-   * Remove expired/invalid authentication
-   * cookies.
-   *
-   * Middleware cannot remove localStorage.
-   * localStorage will be cleared after
-   * the frontend loads the login page.
+  /**
+   * Remove invalid authentication cookies.
    */
-  response.cookies.delete(
-    "accessToken",
-  );
-
-  response.cookies.delete(
-    "role",
-  );
+  response.cookies.delete("accessToken");
+  response.cookies.delete("role");
 
   return response;
 }
@@ -145,23 +101,62 @@ function redirectToLogin(
 export function middleware(
   request: NextRequest,
 ) {
-  const { pathname } =
-    request.nextUrl;
+  const { pathname } = request.nextUrl;
 
-  /*
-   * Middleware can read cookies.
-   *
-   * Middleware cannot read localStorage.
+  /**
+   * ==========================================================
+   * AUTH COOKIES
+   * ==========================================================
    */
   const accessToken =
-    request.cookies.get(
-      "accessToken",
-    )?.value;
+    request.cookies.get("accessToken")?.value;
 
   const role =
-    request.cookies.get(
-      "role",
-    )?.value;
+    request.cookies.get("role")?.value;
+
+  /**
+   * ==========================================================
+   * PUBLIC JOB SEEKER PAGES
+   * ==========================================================
+   *
+   * These pages MUST NOT require authentication.
+   *
+   * Public:
+   *
+   * /dashboard/jobseeker/jobs
+   * /dashboard/jobseeker/jobs/1
+   *
+   * /dashboard/jobseeker/companies
+   * /dashboard/jobseeker/companies/1
+   *
+   * This is the important fix.
+   */
+
+  const isPublicJobsRoute =
+    pathname === routes.jobs.all ||
+    pathname.startsWith(
+      `${routes.jobs.all}/`,
+    );
+
+  const isPublicCompaniesRoute =
+    pathname === routes.companies.all ||
+    pathname.startsWith(
+      `${routes.companies.all}/`,
+    );
+
+  /**
+   * If the user is visiting a public job/company
+   * page, allow access immediately.
+   *
+   * Do NOT check accessToken.
+   * Do NOT check role.
+   */
+  if (
+    isPublicJobsRoute ||
+    isPublicCompaniesRoute
+  ) {
+    return NextResponse.next();
+  }
 
   /**
    * ==========================================================
@@ -173,22 +168,17 @@ export function middleware(
    * /dashboard/admin
    * /dashboard/admin/*
    *
-   * Requirements:
-   *
-   * 1. accessToken must exist
-   * 2. accessToken must not be expired
-   * 3. role must be ADMIN
+   * Only ADMIN is allowed.
    */
   const isAdminRoute =
-    pathname ===
-      routes.admin.dashboard ||
+    pathname === routes.admin.dashboard ||
     pathname.startsWith(
       "/dashboard/admin/",
     );
 
   if (isAdminRoute) {
-    /*
-     * No access token.
+    /**
+     * No token
      */
     if (!accessToken) {
       return redirectToLogin(
@@ -197,21 +187,18 @@ export function middleware(
       );
     }
 
-    /*
-     * Access token has expired.
+    /**
+     * Expired token
      */
-    if (
-      isTokenExpired(accessToken)
-    ) {
+    if (isTokenExpired(accessToken)) {
       return redirectToLogin(
         request,
         routes.auth.adminLogin,
       );
     }
 
-    /*
-     * Token exists and is valid,
-     * but the user is not ADMIN.
+    /**
+     * Wrong role
      */
     if (role !== "ADMIN") {
       return redirectToLogin(
@@ -220,8 +207,8 @@ export function middleware(
       );
     }
 
-    /*
-     * ADMIN is allowed.
+    /**
+     * ADMIN allowed
      */
     return NextResponse.next();
   }
@@ -236,22 +223,17 @@ export function middleware(
    * /dashboard/company
    * /dashboard/company/*
    *
-   * Requirements:
-   *
-   * 1. accessToken must exist
-   * 2. accessToken must not be expired
-   * 3. role must be COMPANY
+   * Only COMPANY is allowed.
    */
   const isCompanyRoute =
-    pathname ===
-      routes.company.dashboard ||
+    pathname === routes.company.dashboard ||
     pathname.startsWith(
       "/dashboard/company/",
     );
 
   if (isCompanyRoute) {
-    /*
-     * No access token.
+    /**
+     * No token
      */
     if (!accessToken) {
       return redirectToLogin(
@@ -260,21 +242,18 @@ export function middleware(
       );
     }
 
-    /*
-     * Access token has expired.
+    /**
+     * Expired token
      */
-    if (
-      isTokenExpired(accessToken)
-    ) {
+    if (isTokenExpired(accessToken)) {
       return redirectToLogin(
         request,
         routes.auth.login,
       );
     }
 
-    /*
-     * Token exists and is valid,
-     * but the user is not COMPANY.
+    /**
+     * Wrong role
      */
     if (role !== "COMPANY") {
       return redirectToLogin(
@@ -283,43 +262,37 @@ export function middleware(
       );
     }
 
-    /*
-     * COMPANY is allowed.
+    /**
+     * COMPANY allowed
      */
     return NextResponse.next();
   }
 
   /**
    * ==========================================================
-   * JOB SEEKER ROUTES
+   * JOB SEEKER PROTECTED ROUTES
    * ==========================================================
    *
    * Protected:
    *
    * /dashboard/jobseeker
-   * /dashboard/jobseeker/*
+   * /dashboard/jobseeker/profile
+   * /dashboard/jobseeker/profile/edit
+   * /dashboard/jobseeker/applications
+   * /dashboard/jobseeker/applications/*
    *
-   * We intentionally use the path directly
-   * instead of routes.jobSeeker.dashboard
-   * because your routes configuration does
-   * not contain routes.jobSeeker.
-   *
-   * Requirements:
-   *
-   * 1. accessToken must exist
-   * 2. accessToken must not be expired
-   * 3. role must be JOB_SEEKER
+   * Public job/company routes were already handled above,
+   * so they will NOT reach this protection.
    */
   const isJobSeekerRoute =
-    pathname ===
-      "/dashboard/jobseeker" ||
+    pathname === routes.jobseeker.dashboard ||
     pathname.startsWith(
-      "/dashboard/jobseeker/",
+      `${routes.jobseeker.dashboard}/`,
     );
 
   if (isJobSeekerRoute) {
-    /*
-     * No access token.
+    /**
+     * No token
      */
     if (!accessToken) {
       return redirectToLogin(
@@ -328,21 +301,18 @@ export function middleware(
       );
     }
 
-    /*
-     * Access token has expired.
+    /**
+     * Expired token
      */
-    if (
-      isTokenExpired(accessToken)
-    ) {
+    if (isTokenExpired(accessToken)) {
       return redirectToLogin(
         request,
         routes.auth.login,
       );
     }
 
-    /*
-     * Token exists and is valid,
-     * but the user is not JOB_SEEKER.
+    /**
+     * Wrong role
      */
     if (role !== "JOB_SEEKER") {
       return redirectToLogin(
@@ -351,18 +321,18 @@ export function middleware(
       );
     }
 
-    /*
-     * JOB_SEEKER is allowed.
+    /**
+     * JOB_SEEKER allowed
      */
     return NextResponse.next();
   }
 
-  /*
+  /**
    * ==========================================================
-   * PUBLIC ROUTES
+   * EVERYTHING ELSE
    * ==========================================================
    *
-   * Everything else is allowed.
+   * Public routes are allowed.
    */
   return NextResponse.next();
 }
@@ -372,8 +342,7 @@ export function middleware(
  * MIDDLEWARE MATCHER
  * ============================================================
  *
- * Middleware will run only for protected
- * dashboard routes.
+ * Middleware runs for dashboard routes.
  */
 export const config = {
   matcher: [

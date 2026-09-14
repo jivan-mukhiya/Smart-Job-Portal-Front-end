@@ -15,6 +15,8 @@ import { useState } from "react";
 
 import { routes } from "@/config/routes";
 import { useAuth } from "@/context/AuthContext";
+import { useMyCompany } from "@/hooks/useMyCompany";
+import { useCompanyLogo } from "@/hooks/use-company-logo";
 
 export function CompanyHeader() {
   const pathname = usePathname();
@@ -23,6 +25,54 @@ export function CompanyHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const { user, logout } = useAuth();
+
+  /*
+   * ============================================================
+   * GET LOGGED-IN COMPANY
+   * ============================================================
+   *
+   * /companies/me
+   *
+   * This gives us the actual company ID.
+   */
+  const {
+    company,
+    loading: companyLoading,
+  } = useMyCompany();
+
+  /*
+   * ============================================================
+   * COMPANY ID
+   * ============================================================
+   */
+
+  const companyId = company?.id;
+
+  /*
+   * ============================================================
+   * GET COMPANY LOGO
+   * ============================================================
+   *
+   * Calls:
+   *
+   * GET /companies/{companyId}/logo
+   *
+   * Example:
+   *
+   * GET /companies/4/logo
+   *
+   * Backend returns the complete image URL.
+   */
+  const {
+    logoUrl,
+    loading: logoLoading,
+  } = useCompanyLogo(companyId);
+
+  /*
+   * ============================================================
+   * NAVIGATION
+   * ============================================================
+   */
 
   const navigation = [
     {
@@ -37,6 +87,12 @@ export function CompanyHeader() {
     },
   ];
 
+  /*
+   * ============================================================
+   * ACTIVE NAVIGATION
+   * ============================================================
+   */
+
   const isActive = (href: string) => {
     if (href === routes.company.dashboard) {
       return pathname === href;
@@ -46,10 +102,24 @@ export function CompanyHeader() {
   };
 
   /*
-   * Generate initials from the logged-in user's name.
-   * Example:
-   * "Smart Company" -> "SC"
+   * ============================================================
+   * COMPANY NAME
+   * ============================================================
+   *
+   * Prefer company.companyName because this is the actual
+   * company information returned by /companies/me.
    */
+  const companyName =
+    company?.companyName ||
+    user?.fullName ||
+    "Smart Company";
+
+  /*
+   * ============================================================
+   * INITIALS FALLBACK
+   * ============================================================
+   */
+
   const getInitials = (name?: string) => {
     if (!name?.trim()) {
       return "CO";
@@ -59,20 +129,20 @@ export function CompanyHeader() {
       .trim()
       .split(/\s+/)
       .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
+      .map((part) =>
+        part.charAt(0).toUpperCase(),
+      )
       .join("");
   };
 
-  const companyName = user?.fullName || "Smart Company";
   const initials = getInitials(companyName);
 
   /*
-   * Logout pattern copied from the working Navbar:
-   *
-   * 1. Close menus
-   * 2. Clear auth state/storage
-   * 3. Redirect to login
+   * ============================================================
+   * LOGOUT
+   * ============================================================
    */
+
   const handleLogout = () => {
     setProfileOpen(false);
     setMobileOpen(false);
@@ -87,15 +157,18 @@ export function CompanyHeader() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
         {/* =====================================================
-            LOGO
+            LEFT BRAND
         ===================================================== */}
 
         <Link
           href={routes.company.dashboard}
           className="flex items-center gap-3"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white">
-            <BriefcaseBusiness size={19} />
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-slate-950">
+            <BriefcaseBusiness
+              size={19}
+              className="text-white"
+            />
           </div>
 
           <div className="hidden sm:block">
@@ -145,19 +218,46 @@ export function CompanyHeader() {
 
         <div className="flex items-center gap-2">
 
-          {/* Profile */}
+          {/* ===================================================
+              COMPANY PROFILE
+          =================================================== */}
 
           <div className="relative hidden sm:block">
             <button
               type="button"
-              onClick={() => setProfileOpen((value) => !value)}
+              onClick={() =>
+                setProfileOpen((value) => !value)
+              }
               className="flex items-center gap-2 rounded-xl px-3 py-2 transition hover:bg-slate-100"
               aria-expanded={profileOpen}
               aria-haspopup="menu"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
-                {initials}
+
+              {/* ===============================================
+                  COMPANY LOGO
+              =============================================== */}
+
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-950">
+
+                {companyLoading || logoLoading ? (
+                  <div className="h-full w-full animate-pulse bg-slate-200" />
+                ) : logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt={`${companyName} logo`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-bold text-white">
+                    {initials}
+                  </span>
+                )}
+
               </div>
+
+              {/* ===============================================
+                  COMPANY NAME
+              =============================================== */}
 
               <div className="hidden text-left lg:block">
                 <p className="max-w-32 truncate text-sm font-semibold text-slate-900">
@@ -172,12 +272,16 @@ export function CompanyHeader() {
               <ChevronDown
                 size={16}
                 className={`text-slate-500 transition-transform ${
-                  profileOpen ? "rotate-180" : ""
+                  profileOpen
+                    ? "rotate-180"
+                    : ""
                 }`}
               />
             </button>
 
-            {/* Dropdown */}
+            {/* ===============================================
+                PROFILE DROPDOWN
+            =============================================== */}
 
             {profileOpen && (
               <div
@@ -186,7 +290,9 @@ export function CompanyHeader() {
               >
                 <Link
                   href={routes.company.profile.view}
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
                   className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                   role="menuitem"
                 >
@@ -209,7 +315,9 @@ export function CompanyHeader() {
             )}
           </div>
 
-          {/* Mobile button */}
+          {/* ===================================================
+              MOBILE BUTTON
+          =================================================== */}
 
           <button
             type="button"
@@ -230,9 +338,9 @@ export function CompanyHeader() {
         </div>
       </div>
 
-      {/* =====================================================
+      {/* ========================================================
           MOBILE NAVIGATION
-      ===================================================== */}
+      ======================================================== */}
 
       {mobileOpen && (
         <div className="border-t border-slate-200 bg-white md:hidden">
@@ -242,7 +350,9 @@ export function CompanyHeader() {
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setMobileOpen(false)}
+                onClick={() =>
+                  setMobileOpen(false)
+                }
                 className={`
                   flex items-center gap-3
                   rounded-xl
@@ -264,18 +374,16 @@ export function CompanyHeader() {
 
             <div className="mt-2 border-t border-slate-200 pt-2">
 
-              {/* Mobile Profile */}
-
               <Link
                 href={routes.company.profile.view}
-                onClick={() => setMobileOpen(false)}
+                onClick={() =>
+                  setMobileOpen(false)
+                }
                 className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
               >
                 <User size={18} />
                 Profile
               </Link>
-
-              {/* Mobile Logout */}
 
               <button
                 type="button"
@@ -285,6 +393,7 @@ export function CompanyHeader() {
                 <LogOut size={18} />
                 Logout
               </button>
+
             </div>
           </nav>
         </div>

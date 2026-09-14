@@ -4,6 +4,7 @@ import { apiClient } from "@/lib/api-client";
 import type {
   ActiveCompaniesResponse,
   CompaniesResponse,
+  CompanyLogoResponse,
   CompanyResponse,
   CompanyStatus,
   CompanyStatusResponse,
@@ -78,6 +79,25 @@ export const companyService = {
   ): Promise<CompanyResponse> {
     return apiClient<CompanyResponse>(
       api.companies.byId(id),
+      {
+        method: "GET",
+      },
+    );
+  },
+
+  // ============================================================
+  // PUBLIC
+  // GET /companies/{id}/logo
+  //
+  // Returns the complete logo URL:
+  // http://localhost:9000/api/v1/files/uploads/company/logo/...
+  // ============================================================
+
+  getCompanyLogo(
+    id: number | string,
+  ): Promise<CompanyLogoResponse> {
+    return apiClient<CompanyLogoResponse>(
+      api.companies.logo(id),
       {
         method: "GET",
       },

@@ -1,5 +1,3 @@
-// src/services/job.service.ts
-
 import { api } from "@/config/api";
 import { apiClient } from "@/lib/api-client";
 
@@ -10,20 +8,19 @@ import type {
   JobsPageData,
   MyJobsResponse,
   PublishedJobsResponse,
+  RecommendedJobsResponse,
 } from "@/types/job";
 
 export const jobService = {
   // ============================================================
   // GET PUBLISHED JOBS
-  //
-  // GET /jobs/published?page=0&size=20
-  // GET /jobs/published?page=0&size=20&search=java
   // ============================================================
 
   getPublishedJobs(
     page: number = 0,
     size: number = 20,
     search?: string,
+    location?: string,
   ): Promise<PublishedJobsResponse> {
     return apiClient<PublishedJobsResponse>(
       api.jobs.published,
@@ -39,6 +36,47 @@ export const jobService = {
                 search: search.trim(),
               }
             : {}),
+
+          ...(location?.trim()
+            ? {
+                location: location.trim(),
+              }
+            : {}),
+        },
+      },
+    );
+  },
+
+  // ============================================================
+  // GET RECOMMENDED JOBS
+  // ============================================================
+
+  getRecommendedJobs(
+    page: number = 0,
+    size: number = 10,
+    search?: string,
+    location?: string,
+  ): Promise<RecommendedJobsResponse> {
+    return apiClient<RecommendedJobsResponse>(
+      api.recommendations.jobs,
+      {
+        method: "GET",
+
+        params: {
+          page,
+          size,
+
+          ...(search?.trim()
+            ? {
+                search: search.trim(),
+              }
+            : {}),
+
+          ...(location?.trim()
+            ? {
+                location: location.trim(),
+              }
+            : {}),
         },
       },
     );
@@ -46,9 +84,6 @@ export const jobService = {
 
   // ============================================================
   // GET MY JOBS
-  //
-  // GET /jobs/me?page=0&size=20
-  // GET /jobs/me?page=0&size=20&search=java
   // ============================================================
 
   getMyJobs(
@@ -77,8 +112,6 @@ export const jobService = {
 
   // ============================================================
   // GET JOB BY ID
-  //
-  // GET /jobs/{jobId}
   // ============================================================
 
   getJobById(
@@ -94,8 +127,6 @@ export const jobService = {
 
   // ============================================================
   // CREATE JOB
-  //
-  // POST /jobs
   // ============================================================
 
   createJob(
@@ -105,7 +136,6 @@ export const jobService = {
       api.jobs.all,
       {
         method: "POST",
-
         data,
       },
     );
@@ -113,8 +143,6 @@ export const jobService = {
 
   // ============================================================
   // UPDATE JOB
-  //
-  // PUT /jobs/{jobId}
   // ============================================================
 
   updateJob(
@@ -125,7 +153,6 @@ export const jobService = {
       api.jobs.byId(id),
       {
         method: "PUT",
-
         data,
       },
     );
@@ -133,8 +160,6 @@ export const jobService = {
 
   // ============================================================
   // DELETE JOB
-  //
-  // DELETE /jobs/{jobId}
   // ============================================================
 
   deleteJob(
@@ -150,8 +175,6 @@ export const jobService = {
 
   // ============================================================
   // PUBLISH JOB
-  //
-  // PATCH /jobs/{jobId}/publish
   // ============================================================
 
   publishJob(
@@ -167,8 +190,6 @@ export const jobService = {
 
   // ============================================================
   // CLOSE JOB
-  //
-  // PATCH /jobs/{jobId}/close
   // ============================================================
 
   closeJob(
@@ -184,13 +205,6 @@ export const jobService = {
 
   // ============================================================
   // CHANGE JOB STATUS
-  //
-  // PATCH /jobs/{jobId}/status?status={status}
-  //
-  // Example:
-  // status = "ACTIVE"
-  // status = "CLOSED"
-  // status = "DRAFT"
   // ============================================================
 
   updateJobStatus(
@@ -211,8 +225,6 @@ export const jobService = {
 
   // ============================================================
   // GET JOBS BY COMPANY
-  //
-  // GET /jobs/company/{companyId}?page=0&size=20
   // ============================================================
 
   getJobsByCompany(

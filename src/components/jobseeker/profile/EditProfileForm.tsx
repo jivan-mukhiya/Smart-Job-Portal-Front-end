@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   ArrowLeft,
@@ -25,8 +26,10 @@ import { useJobSeekerProfile } from "@/hooks/useJobSeekerProfile";
 
 import { jobSeekerService } from "@/services/jobseeker.service";
 
+import { routes } from "@/config/routes";
 
 export default function EditProfileForm() {
+  const router = useRouter();
 
   // =============================================================
   // PROFILE
@@ -39,7 +42,6 @@ export default function EditProfileForm() {
     profileNotFound,
     refetch,
   } = useJobSeekerProfile();
-
 
   // =============================================================
   // FORM STATE
@@ -72,14 +74,12 @@ export default function EditProfileForm() {
   const [resumeUrl, setResumeUrl] =
     useState("");
 
-
   // =============================================================
   // JOB PREFERENCE
   // =============================================================
 
   const [openToWork, setOpenToWork] =
     useState(false);
-
 
   // =============================================================
   // SKILLS
@@ -91,7 +91,6 @@ export default function EditProfileForm() {
   const [newSkill, setNewSkill] =
     useState("");
 
-
   // =============================================================
   // SOCIAL PROFILES
   // =============================================================
@@ -102,7 +101,6 @@ export default function EditProfileForm() {
   const [githubUrl, setGithubUrl] =
     useState("");
 
-
   // =============================================================
   // FILES
   // =============================================================
@@ -112,7 +110,6 @@ export default function EditProfileForm() {
 
   const [resumeFile, setResumeFile] =
     useState<File | null>(null);
-
 
   // =============================================================
   // UI STATE
@@ -127,17 +124,14 @@ export default function EditProfileForm() {
   const [successMessage, setSuccessMessage] =
     useState<string | null>(null);
 
-
   // =============================================================
   // POPULATE FORM
   // =============================================================
 
   useEffect(() => {
-
     if (!profile) {
       return;
     }
-
 
     setFullName(
       profile.fullName ?? ""
@@ -163,7 +157,6 @@ export default function EditProfileForm() {
       profile.address ?? ""
     );
 
-
     setYearsOfExperience(
       profile.yearsOfExperience ?? ""
     );
@@ -172,16 +165,13 @@ export default function EditProfileForm() {
       profile.highestEducation ?? ""
     );
 
-
     setResumeUrl(
       profile.resume?.resumeUrl ?? ""
     );
 
-
     setOpenToWork(
       profile.openToWork ?? false
     );
-
 
     // =========================================================
     // SKILLS
@@ -203,7 +193,6 @@ export default function EditProfileForm() {
             skill.skillName
         );
 
-
     /*
      * Remove duplicate skills immediately.
      */
@@ -219,11 +208,9 @@ export default function EditProfileForm() {
         ).values()
       );
 
-
     setSkills(
       uniqueSkills
     );
-
 
     // =========================================================
     // SOCIAL PROFILES
@@ -236,7 +223,6 @@ export default function EditProfileForm() {
             social.active !== false
         );
 
-
     const linkedin =
       socialProfiles.find(
         (social) =>
@@ -244,7 +230,6 @@ export default function EditProfileForm() {
             ?.toLowerCase() ===
           "linkedin"
       );
-
 
     const github =
       socialProfiles.find(
@@ -254,7 +239,6 @@ export default function EditProfileForm() {
           "github"
       );
 
-
     setLinkedinUrl(
       linkedin?.url ?? ""
     );
@@ -262,7 +246,6 @@ export default function EditProfileForm() {
     setGithubUrl(
       github?.url ?? ""
     );
-
 
     /*
      * Existing files are not placed into File state.
@@ -272,21 +255,17 @@ export default function EditProfileForm() {
 
   }, [profile]);
 
-
   // =============================================================
   // ADD SKILL
   // =============================================================
 
   const addSkill = () => {
-
     const skill =
       newSkill.trim();
-
 
     if (!skill) {
       return;
     }
-
 
     const alreadyExists =
       skills.some(
@@ -295,14 +274,10 @@ export default function EditProfileForm() {
           skill.toLowerCase()
       );
 
-
     if (alreadyExists) {
-
       setNewSkill("");
-
       return;
     }
-
 
     setSkills(
       (current) => [
@@ -311,10 +286,8 @@ export default function EditProfileForm() {
       ]
     );
 
-
     setNewSkill("");
   };
-
 
   // =============================================================
   // REMOVE SKILL
@@ -323,7 +296,6 @@ export default function EditProfileForm() {
   const removeSkill = (
     skill: string
   ) => {
-
     setSkills(
       (current) =>
         current.filter(
@@ -333,7 +305,6 @@ export default function EditProfileForm() {
     );
   };
 
-
   // =============================================================
   // PROFILE IMAGE
   // =============================================================
@@ -341,19 +312,15 @@ export default function EditProfileForm() {
   const handleProfileImage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-
     const file =
       event.target.files?.[0];
-
 
     if (!file) {
       return;
     }
 
-
     setProfileImage(file);
   };
-
 
   // =============================================================
   // RESUME
@@ -362,19 +329,15 @@ export default function EditProfileForm() {
   const handleResumeFile = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-
     const file =
       event.target.files?.[0];
-
 
     if (!file) {
       return;
     }
 
-
     setResumeFile(file);
   };
-
 
   // =============================================================
   // SUBMIT
@@ -383,27 +346,19 @@ export default function EditProfileForm() {
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
-
     event.preventDefault();
-
 
     if (saving) {
       return;
     }
 
-
     setSaving(true);
-
     setSubmitError(null);
-
     setSuccessMessage(null);
 
-
     try {
-
       const formData =
         new FormData();
-
 
       // =========================================================
       // PERSONAL INFORMATION
@@ -414,36 +369,30 @@ export default function EditProfileForm() {
         fullName.trim()
       );
 
-
       formData.append(
         "email",
         email.trim()
       );
-
 
       formData.append(
         "phone",
         phone.trim()
       );
 
-
       formData.append(
         "professionalTitle",
         professionalTitle.trim()
       );
-
 
       formData.append(
         "about",
         about.trim()
       );
 
-
       formData.append(
         "address",
         address.trim()
       );
-
 
       // =========================================================
       // PROFESSIONAL INFORMATION
@@ -452,7 +401,6 @@ export default function EditProfileForm() {
       if (
         yearsOfExperience !== ""
       ) {
-
         formData.append(
           "yearsOfExperience",
           String(
@@ -461,38 +409,32 @@ export default function EditProfileForm() {
         );
       }
 
-
       formData.append(
         "highestEducation",
         highestEducation.trim()
       );
-
 
       // =========================================================
       // PROFILE IMAGE
       // =========================================================
 
       if (profileImage) {
-
         formData.append(
           "profileImage",
           profileImage
         );
       }
 
-
       // =========================================================
       // RESUME FILE
       // =========================================================
 
       if (resumeFile) {
-
         formData.append(
           "resumeFile",
           resumeFile
         );
       }
-
 
       // =========================================================
       // RESUME URL
@@ -501,18 +443,16 @@ export default function EditProfileForm() {
       /*
        * Only send resumeUrl if user entered one.
        *
-       * If a new resume file is selected, file takes priority
-       * on backend.
+       * If a new resume file is selected,
+       * the file should take priority on backend.
        */
 
       if (resumeUrl.trim()) {
-
         formData.append(
           "resumeUrl",
           resumeUrl.trim()
         );
       }
-
 
       // =========================================================
       // OPEN TO WORK
@@ -522,7 +462,6 @@ export default function EditProfileForm() {
         "openToWork",
         String(openToWork)
       );
-
 
       // =========================================================
       // SKILLS
@@ -548,12 +487,13 @@ export default function EditProfileForm() {
             skills
               .map(
                 (skill) =>
-                  skill.trim().toLowerCase()
+                  skill
+                    .trim()
+                    .toLowerCase()
               )
               .filter(Boolean)
           )
         );
-
 
       /*
        * Send every skill as:
@@ -565,7 +505,6 @@ export default function EditProfileForm() {
 
       normalizedSkills.forEach(
         (skill) => {
-
           formData.append(
             "skills",
             skill
@@ -573,32 +512,20 @@ export default function EditProfileForm() {
         }
       );
 
-
       /*
-       * If update has zero skills, send an empty skills field.
-       *
-       * Backend will receive:
-       *
-       * skills=[""]
-       *
-       * and replaceSkills() ignores blank values,
-       * resulting in zero skills.
-       *
-       * This is necessary because multipart/form-data
-       * cannot naturally send an empty List.
+       * If update has zero skills,
+       * send an empty skills field.
        */
 
       if (
         !profileNotFound &&
         normalizedSkills.length === 0
       ) {
-
         formData.append(
           "skills",
           ""
         );
       }
-
 
       // =========================================================
       // SOCIAL PROFILES
@@ -609,36 +536,29 @@ export default function EditProfileForm() {
         url: string;
       }[] = [];
 
-
       if (linkedinUrl.trim()) {
-
         socialProfiles.push({
           platform: "LinkedIn",
           url: linkedinUrl.trim(),
         });
       }
 
-
       if (githubUrl.trim()) {
-
         socialProfiles.push({
           platform: "GitHub",
           url: githubUrl.trim(),
         });
       }
 
-
       socialProfiles.forEach(
         (
           socialProfile,
           index
         ) => {
-
           formData.append(
             `socialProfiles[${index}].platform`,
             socialProfile.platform
           );
-
 
           formData.append(
             `socialProfiles[${index}].url`,
@@ -646,7 +566,6 @@ export default function EditProfileForm() {
           );
         }
       );
-
 
       // =========================================================
       // DEBUG
@@ -656,34 +575,28 @@ export default function EditProfileForm() {
         "Job seeker FormData:"
       );
 
-
       for (
         const [key, value]
         of formData.entries()
       ) {
-
         console.log(
           key,
           value
         );
       }
 
-
       // =========================================================
       // CREATE
       // =========================================================
 
       if (profileNotFound) {
-
         await jobSeekerService.createProfile(
           formData
         );
 
-
         setSuccessMessage(
           "Profile created successfully."
         );
-
       }
 
       // =========================================================
@@ -691,31 +604,43 @@ export default function EditProfileForm() {
       // =========================================================
 
       else {
-
         await jobSeekerService.updateMyProfile(
           formData
         );
-
 
         setSuccessMessage(
           "Profile updated successfully."
         );
       }
 
-
       // =========================================================
-      // REFRESH
+      // REFRESH PROFILE
       // =========================================================
 
       await refetch();
 
-    } catch (err: any) {
+      // =========================================================
+      // NAVIGATE TO PROFILE VIEW
+      // =========================================================
 
+      /*
+       * After successful create/update,
+       * go to:
+       *
+       * /dashboard/jobseeker/profile
+       *
+       * using centralized routes.
+       */
+
+      router.push(
+        routes.jobseeker.profile.view
+      );
+
+    } catch (err: any) {
       console.error(
         "Failed to save job seeker profile:",
         err
       );
-
 
       setSubmitError(
         err?.message ||
@@ -723,18 +648,15 @@ export default function EditProfileForm() {
       );
 
     } finally {
-
       setSaving(false);
     }
   };
-
 
   // =============================================================
   // LOADING
   // =============================================================
 
   if (loading) {
-
     return (
       <main className="min-h-screen bg-slate-50">
 
@@ -754,7 +676,6 @@ export default function EditProfileForm() {
     );
   }
 
-
   // =============================================================
   // PROFILE ERROR
   // =============================================================
@@ -763,7 +684,6 @@ export default function EditProfileForm() {
     profileError &&
     !profileNotFound
   ) {
-
     return (
       <main className="min-h-screen bg-slate-50">
 
@@ -774,7 +694,6 @@ export default function EditProfileForm() {
             <p className="text-sm font-medium text-red-600">
               {profileError}
             </p>
-
 
             <button
               type="button"
@@ -792,7 +711,6 @@ export default function EditProfileForm() {
     );
   }
 
-
   // =============================================================
   // PAGE
   // =============================================================
@@ -807,7 +725,9 @@ export default function EditProfileForm() {
         ===================================================== */}
 
         <Link
-          href="/dashboard/jobseeker/profile"
+          href={
+            routes.jobseeker.profile.view
+          }
           className="
             inline-flex
             items-center
@@ -819,13 +739,10 @@ export default function EditProfileForm() {
             hover:text-slate-950
           "
         >
-
           <ArrowLeft size={16} />
 
           Back to Profile
-
         </Link>
-
 
         {/* =====================================================
             HEADING
@@ -834,31 +751,24 @@ export default function EditProfileForm() {
         <div className="mt-6">
 
           <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
-
             {profileNotFound
               ? "Create Profile"
               : "Edit Profile"}
-
           </h1>
 
-
           <p className="mt-2 text-sm leading-6 text-slate-500">
-
             {profileNotFound
               ? "Create your professional profile so companies can learn more about your experience and skills."
               : "Keep your professional profile up to date so companies can better understand your experience and skills."}
-
           </p>
 
         </div>
-
 
         {/* =====================================================
             ERROR
         ===================================================== */}
 
         {submitError && (
-
           <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
 
             <p className="text-sm text-red-600">
@@ -868,13 +778,11 @@ export default function EditProfileForm() {
           </div>
         )}
 
-
         {/* =====================================================
             SUCCESS
         ===================================================== */}
 
         {successMessage && (
-
           <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3">
 
             <p className="text-sm text-green-600">
@@ -883,7 +791,6 @@ export default function EditProfileForm() {
 
           </div>
         )}
-
 
         {/* =====================================================
             FORM
@@ -914,7 +821,6 @@ export default function EditProfileForm() {
                   Full Name
                 </FormLabel>
 
-
                 <Input
                   id="fullName"
                   name="fullName"
@@ -929,11 +835,9 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
-
 
               <Field>
 
@@ -943,7 +847,6 @@ export default function EditProfileForm() {
                 >
                   Email
                 </FormLabel>
-
 
                 <Input
                   id="email"
@@ -960,11 +863,9 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
-
 
               <Field>
 
@@ -974,7 +875,6 @@ export default function EditProfileForm() {
                 >
                   Phone Number
                 </FormLabel>
-
 
                 <Input
                   id="phone"
@@ -991,11 +891,9 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
-
 
               <Field>
 
@@ -1005,7 +903,6 @@ export default function EditProfileForm() {
                 >
                   Professional Title
                 </FormLabel>
-
 
                 <Input
                   id="professionalTitle"
@@ -1021,20 +918,17 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
 
             </div>
 
-
             <Field className="mt-5">
 
               <FormLabel htmlFor="about">
                 About
               </FormLabel>
-
 
               <Textarea
                 id="about"
@@ -1049,20 +943,17 @@ export default function EditProfileForm() {
                 maxLength={1000}
               />
 
-
               <p className="mt-1.5 text-xs text-slate-400">
                 Maximum 1000 characters.
               </p>
 
             </Field>
 
-
             <Field className="mt-5">
 
               <FormLabel htmlFor="address">
                 Address
               </FormLabel>
-
 
               <Input
                 id="address"
@@ -1077,13 +968,11 @@ export default function EditProfileForm() {
                 maxLength={500}
               />
 
-
               <FormError />
 
             </Field>
 
           </FormSection>
-
 
           {/* ===================================================
               PROFESSIONAL INFORMATION
@@ -1105,7 +994,6 @@ export default function EditProfileForm() {
                   Years of Experience
                 </FormLabel>
 
-
                 <Input
                   id="experienceYears"
                   name="yearsOfExperience"
@@ -1118,7 +1006,6 @@ export default function EditProfileForm() {
                     const value =
                       event.target.value;
 
-
                     setYearsOfExperience(
                       value === ""
                         ? ""
@@ -1129,11 +1016,9 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
-
 
               <Field>
 
@@ -1143,7 +1028,6 @@ export default function EditProfileForm() {
                 >
                   Highest Education
                 </FormLabel>
-
 
                 <Input
                   id="highestEducation"
@@ -1159,7 +1043,6 @@ export default function EditProfileForm() {
                   required
                 />
 
-
                 <FormError />
 
               </Field>
@@ -1167,7 +1050,6 @@ export default function EditProfileForm() {
             </div>
 
           </FormSection>
-
 
           {/* ===================================================
               PROFILE IMAGE
@@ -1179,13 +1061,11 @@ export default function EditProfileForm() {
           >
 
             {profile?.profileImage?.imageUrl && (
-
               <div className="mb-5">
 
                 <p className="mb-2 text-xs font-medium text-slate-500">
                   Current Profile Image
                 </p>
-
 
                 <div className="flex items-center gap-4">
 
@@ -1204,7 +1084,6 @@ export default function EditProfileForm() {
                     "
                   />
 
-
                   <div>
 
                     <p className="text-sm font-semibold text-slate-700">
@@ -1213,7 +1092,6 @@ export default function EditProfileForm() {
                         "Current profile image"
                       }
                     </p>
-
 
                     <p className="mt-1 text-xs text-slate-400">
                       Select a new image below to replace it.
@@ -1226,7 +1104,6 @@ export default function EditProfileForm() {
               </div>
             )}
 
-
             <div>
 
               <FormLabel htmlFor="profileImage">
@@ -1234,7 +1111,6 @@ export default function EditProfileForm() {
                   ? "Replace Profile Image"
                   : "Profile Image"}
               </FormLabel>
-
 
               <label
                 htmlFor="profileImage"
@@ -1263,24 +1139,19 @@ export default function EditProfileForm() {
 
                 </div>
 
-
                 <div className="min-w-0">
 
                   <p className="text-sm font-semibold text-slate-700">
-
                     {profileImage
                       ? profileImage.name
                       : "Choose a profile image"}
-
                   </p>
-
 
                   <p className="mt-1 text-xs text-slate-400">
                     PNG, JPG or WEBP
                   </p>
 
                 </div>
-
 
                 <input
                   id="profileImage"
@@ -1297,7 +1168,6 @@ export default function EditProfileForm() {
 
           </FormSection>
 
-
           {/* ===================================================
               RESUME
           =================================================== */}
@@ -1308,7 +1178,6 @@ export default function EditProfileForm() {
           >
 
             {profile?.resume && (
-
               <div className="mb-5 rounded-xl border border-slate-200 bg-slate-50 p-4">
 
                 <div className="flex items-center gap-3">
@@ -1319,33 +1188,25 @@ export default function EditProfileForm() {
 
                   </div>
 
-
                   <div className="min-w-0 flex-1">
 
                     <p className="truncate text-sm font-semibold text-slate-700">
-
                       {
                         profile.resume.fileName ||
                         "Current resume"
                       }
-
                     </p>
 
-
                     <p className="mt-1 text-xs text-slate-400">
-
                       {
                         profile.resume.contentType ||
                         "Resume"
                       }
-
                     </p>
 
                   </div>
 
-
                   {profile.resume.fileUrl && (
-
                     <a
                       href={
                         profile.resume.fileUrl
@@ -1356,14 +1217,12 @@ export default function EditProfileForm() {
                     >
                       View
                     </a>
-
                   )}
 
                 </div>
 
               </div>
             )}
-
 
             <Field>
 
@@ -1372,7 +1231,6 @@ export default function EditProfileForm() {
                   ? "Replace Resume"
                   : "Resume File"}
               </FormLabel>
-
 
               <label
                 htmlFor="resumeFile"
@@ -1401,24 +1259,19 @@ export default function EditProfileForm() {
 
                 </div>
 
-
                 <div className="min-w-0">
 
                   <p className="text-sm font-semibold text-slate-700">
-
                     {resumeFile
                       ? resumeFile.name
                       : "Choose your resume"}
-
                   </p>
-
 
                   <p className="mt-1 text-xs text-slate-400">
                     PDF recommended
                   </p>
 
                 </div>
-
 
                 <input
                   id="resumeFile"
@@ -1433,13 +1286,11 @@ export default function EditProfileForm() {
 
             </Field>
 
-
             <Field className="mt-5">
 
               <FormLabel htmlFor="resumeUrl">
                 Resume URL
               </FormLabel>
-
 
               <Input
                 id="resumeUrl"
@@ -1458,13 +1309,11 @@ export default function EditProfileForm() {
                 maxLength={500}
               />
 
-
               <FormError />
 
             </Field>
 
           </FormSection>
-
 
           {/* ===================================================
               SKILLS
@@ -1507,7 +1356,6 @@ export default function EditProfileForm() {
                         {skill}
                       </span>
 
-
                       <button
                         type="button"
                         onClick={() =>
@@ -1534,7 +1382,6 @@ export default function EditProfileForm() {
 
             </div>
 
-
             <div className="mt-4 flex items-end gap-2">
 
               <div className="flex-1">
@@ -1542,7 +1389,6 @@ export default function EditProfileForm() {
                 <FormLabel htmlFor="newSkill">
                   Add Skill
                 </FormLabel>
-
 
                 <Input
                   id="newSkill"
@@ -1570,7 +1416,6 @@ export default function EditProfileForm() {
 
               </div>
 
-
               <Button
                 type="button"
                 variant="outline"
@@ -1584,14 +1429,12 @@ export default function EditProfileForm() {
 
             </div>
 
-
             <p className="mt-2 text-xs text-slate-400">
               Add at least one skill. Each skill can contain
               up to 50 characters.
             </p>
 
           </FormSection>
-
 
           {/* ===================================================
               SOCIAL PROFILES
@@ -1609,7 +1452,6 @@ export default function EditProfileForm() {
                 <FormLabel htmlFor="linkedinUrl">
                   LinkedIn URL
                 </FormLabel>
-
 
                 <Input
                   id="linkedinUrl"
@@ -1630,18 +1472,15 @@ export default function EditProfileForm() {
                   maxLength={255}
                 />
 
-
                 <FormError />
 
               </Field>
-
 
               <Field>
 
                 <FormLabel htmlFor="githubUrl">
                   GitHub URL
                 </FormLabel>
-
 
                 <Input
                   id="githubUrl"
@@ -1662,7 +1501,6 @@ export default function EditProfileForm() {
                   maxLength={255}
                 />
 
-
                 <FormError />
 
               </Field>
@@ -1670,7 +1508,6 @@ export default function EditProfileForm() {
             </div>
 
           </FormSection>
-
 
           {/* ===================================================
               JOB PREFERENCE
@@ -1714,13 +1551,11 @@ export default function EditProfileForm() {
                 "
               />
 
-
               <span>
 
                 <span className="block text-sm font-semibold text-slate-800">
                   I'm open to work
                 </span>
-
 
                 <span className="mt-1 block text-xs leading-5 text-slate-500">
                   Let companies know that you are currently
@@ -1732,7 +1567,6 @@ export default function EditProfileForm() {
             </label>
 
           </FormSection>
-
 
           {/* ===================================================
               ACTIONS
@@ -1749,7 +1583,9 @@ export default function EditProfileForm() {
           >
 
             <Link
-              href="/dashboard/jobseeker/profile"
+              href={
+                routes.jobseeker.profile.view
+              }
               className="
                 inline-flex
                 h-11
@@ -1769,7 +1605,6 @@ export default function EditProfileForm() {
             >
               Cancel
             </Link>
-
 
             <Button
               type="submit"
@@ -1801,7 +1636,6 @@ export default function EditProfileForm() {
   );
 }
 
-
 // =============================================================
 // FIELD
 // =============================================================
@@ -1813,14 +1647,12 @@ function Field({
   children: React.ReactNode;
   className?: string;
 }) {
-
   return (
     <div className={className}>
       {children}
     </div>
   );
 }
-
 
 // =============================================================
 // FORM SECTION
@@ -1835,7 +1667,6 @@ function FormSection({
   description: string;
   children: React.ReactNode;
 }) {
-
   return (
     <section
       className="
@@ -1854,13 +1685,11 @@ function FormSection({
           {title}
         </h2>
 
-
         <p className="mt-1 text-sm leading-6 text-slate-500">
           {description}
         </p>
 
       </div>
-
 
       <div className="pt-6">
         {children}

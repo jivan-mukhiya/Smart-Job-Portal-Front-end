@@ -347,3 +347,11 @@ export interface JobMutationResponse {
 
   timestamp?: string;
 }
+
+
+export interface RecommendedJobsResponse {
+  success: boolean;
+  message: string;
+  data: JobsPageData;
+  timestamp?: string;
+}
